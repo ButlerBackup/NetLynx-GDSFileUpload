@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">GDS File Upload</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="verify_pin_text">Enter the PIN that has been sent to your phone</string>
+    <string-array name="fabActionMain">
+        <item>Capture a photo</item>
+        <item>Take a video</item>
+        <item>Pick a photo from gallery</item>
+    </string-array>
+
+    <string-array name="nav">
+        <item>Standard</item>
+        <item>Front Camera</item>
+    </string-array>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Misc">
+        <Preference
+            android:key="pref_messages_clear"
+            android:title="Clear All Messages" />
+        <Preference
+            android:key="pref_reregister"
+            android:title="Register again" />
+
+
+    </PreferenceCategory>
+</PreferenceScreen>
