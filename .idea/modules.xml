@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/GDSFileUpload.iml" filepath="$PROJECT_DIR$/GDSFileUpload.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/library_cropper/library_cropper.iml" filepath="$PROJECT_DIR$/library_cropper/library_cropper.iml" />
       <module fileurl="file://$PROJECT_DIR$/library_securepreferences/library_securepreferences.iml" filepath="$PROJECT_DIR$/library_securepreferences/library_securepreferences.iml" />
       <module fileurl="file://$PROJECT_DIR$/library_timeago/library_timeago.iml" filepath="$PROJECT_DIR$/library_timeago/library_timeago.iml" />
       <module fileurl="file://$PROJECT_DIR$/material/material.iml" filepath="$PROJECT_DIR$/material/material.iml" />

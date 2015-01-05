@@ -85,6 +85,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="fbutton-1.0.5" level="project" />
     <orderEntry type="library" exported="" name="imagezoom-2.1.1" level="project" />
+    <orderEntry type="library" exported="" name="crashlytics-1.1.13" level="project" />
     <orderEntry type="library" exported="" name="android-crop-0.9.10" level="project" />
     <orderEntry type="library" exported="" name="littlefluffylocationlibrary_r15" level="project" />
     <orderEntry type="library" exported="" name="support-v4-21.0.3" level="project" />

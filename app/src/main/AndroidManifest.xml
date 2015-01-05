@@ -43,6 +43,7 @@
                     android:exported="false" />
             </intent-filter>
         </receiver>
+        <meta-data android:name="com.crashlytics.ApiKey" android:value="c3d209b76117254253c9ff1ad725518e538ea6e3"/>
     </application>
 
     <uses-permission android:name="android.permission.CAMERA" />

@@ -1,7 +1,6 @@
 package com.netlynxtech.gdsfileupload;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -101,7 +100,7 @@ public class MainActivity extends ActionBarActivity {
                                 Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                 File dir = Environment
                                         .getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-                                pictureDirectory = System.currentTimeMillis() + ".jpeg";
+                                pictureDirectory = System.currentTimeMillis() + ".jpg";
                                 File output = new File(dir, pictureDirectory);
                                 i.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(output));
                                 startActivityForResult(i, Consts.CAMERA_PHOTO_REQUEST);
@@ -120,22 +119,9 @@ public class MainActivity extends ActionBarActivity {
         if (requestCode == Consts.CAMERA_PHOTO_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Uri source = Uri.fromFile(new File(Environment
-                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).toString() + "/" + pictureDirectory));
-                Uri outputUri = Uri.fromFile(new File(getCacheDir(), System.currentTimeMillis() + ""));
-                new Crop(source).output(outputUri).asSquare().start(this);
-            }
-        } else if (requestCode == Consts.CAMERA_PICK_IMAGE_FROM_GALLERY) {
-            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
-                Uri _uri = data.getData();
-
-                //User had pick an image.
-                Cursor cursor = getContentResolver().query(_uri, new String[]{android.provider.MediaStore.Images.ImageColumns.DATA}, null, null, null);
-                cursor.moveToFirst();
-
-                //Link to the image
-                final String imageFilePath = cursor.getString(0);
-                cursor.close();
-                startActivity(new Intent(MainActivity.this, NewTimelineItemActivity.class).putExtra(Consts.IMAGE_GALLERY_PASS_EXTRAS, imageFilePath));
+                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).toString(), pictureDirectory));
+                Uri outputUri = Uri.fromFile(new File(getCacheDir(), System.currentTimeMillis() + ".jpg"));
+                new Crop(source).output(outputUri).asSquare().start(MainActivity.this);
             }
         } else if (requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK) {
             Uri outputUri = Uri.fromFile(new File(getCacheDir(), System.currentTimeMillis() + ""));
@@ -147,10 +133,10 @@ public class MainActivity extends ActionBarActivity {
 
     private void handleCrop(int resultCode, Intent result) {
         if (resultCode == RESULT_OK) {
-            Log.e("RESULT", Crop.getOutput(result).toString());
+            Toast.makeText(MainActivity.this, Crop.getOutput(result).toString(), Toast.LENGTH_SHORT).show();
             startActivity(new Intent(MainActivity.this, NewTimelineItemActivity.class).putExtra(Consts.NEW_GALLERY_IMAGE_CROP_LIB_PASS_EXTRA, Crop.getOutput(result).toString()));
         } else if (resultCode == Crop.RESULT_ERROR) {
-            Toast.makeText(this, Crop.getError(result).getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, Crop.getError(result).getMessage().toString(), Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -6,8 +6,10 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.crashlytics.android.Crashlytics;
 import com.github.mrengineer13.snackbar.SnackBar;
 import com.netlynxtech.gdsfileupload.apiclasses.RegisterUser;
 import com.netlynxtech.gdsfileupload.classes.Utils;
@@ -30,6 +32,7 @@ public class RegisterActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Crashlytics.start(this);
         if (new Utils(RegisterActivity.this).checkIfRegistered()) {
             startActivity(new Intent(RegisterActivity.this, MainActivity.class));
             finish();
@@ -71,6 +74,7 @@ public class RegisterActivity extends ActionBarActivity {
                         pd.dismiss();
                     }
                     if (res.getStatusCode() == 1) {
+                        Toast.makeText(RegisterActivity.this, res.getStatusDescription(), Toast.LENGTH_LONG).show();
                         new Utils(RegisterActivity.this).storeSecurePreferenceValue(Consts.REGISTER_MOBILE_NUMBER, etPhoneNumber.getText().toString());
                         new Utils(RegisterActivity.this).storeSecurePreferenceValue(Consts.REGISTER_LOGIN_ID, etLoginId.getText().toString());
                         new Utils(RegisterActivity.this).storeSecurePreferenceValue(Consts.REGISTER_PASSWORD, etPassword.getText().toString());

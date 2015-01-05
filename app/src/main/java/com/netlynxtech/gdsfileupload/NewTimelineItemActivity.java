@@ -11,7 +11,6 @@ import android.location.Geocoder;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -19,6 +18,7 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.mrengineer13.snackbar.SnackBar;
@@ -62,14 +62,8 @@ public class NewTimelineItemActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-        if (getIntent().hasExtra(Consts.NEW_CAMERA_IMAGE_CROP_LIB_PASS_EXTRA)) {
-            File dir = Environment
-                    .getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-            pictureFileName = getIntent().getStringExtra(Consts.NEW_CAMERA_IMAGE_CROP_LIB_PASS_EXTRA);
-            Log.e("FILENAME", dir.toString() + "/" + pictureFileName);
-            imgFile = new File(dir.toString() + "/" + pictureFileName);
-        } else if (getIntent().hasExtra(Consts.IMAGE_GALLERY_PASS_EXTRAS)) {
-            pictureFileName = getIntent().getStringExtra(Consts.IMAGE_GALLERY_PASS_EXTRAS);
+        if (getIntent().hasExtra(Consts.NEW_GALLERY_IMAGE_CROP_LIB_PASS_EXTRA)) {
+            pictureFileName = getIntent().getStringExtra(Consts.NEW_GALLERY_IMAGE_CROP_LIB_PASS_EXTRA);
             Uri uriPath = Uri.parse(pictureFileName);
             imgFile = new File(uriPath.getPath());
             Log.e("FILENAME", uriPath.getPath());
@@ -202,6 +196,7 @@ public class NewTimelineItemActivity extends ActionBarActivity {
                 res = MainApplication.apiService.uploadContentWithMessage(m);
             } catch (Exception e) {
                 e.printStackTrace();
+                Toast.makeText(NewTimelineItemActivity.this, e.getMessage().toString(), Toast.LENGTH_LONG).show();
             }
             return null;
         }

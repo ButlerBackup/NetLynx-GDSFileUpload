@@ -8,9 +8,6 @@ import com.netlynxtech.gdsfileupload.classes.ApiService;
 
 import retrofit.RestAdapter;
 
-/**
- * Created by Probook2 on 30/12/2014.
- */
 public class MainApplication extends Application {
 
     public static ApiService apiService;

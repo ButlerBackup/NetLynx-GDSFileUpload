@@ -78,7 +78,7 @@ public class Utils {
 
     public String convertBitmapToString(Bitmap bmp) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.JPEG, 80, baos); //bm is the bitmap object
+        bmp.compress(Bitmap.CompressFormat.JPEG, 60, baos); //bm is the bitmap object
         byte[] b = baos.toByteArray();
         return Base64.encodeToString(b, Base64.DEFAULT);
     }
