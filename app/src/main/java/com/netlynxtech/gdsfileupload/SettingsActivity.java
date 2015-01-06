@@ -1,5 +1,7 @@
 package com.netlynxtech.gdsfileupload;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -7,6 +9,7 @@ import android.preference.PreferenceActivity;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.netlynxtech.gdsfileupload.classes.SQLFunctions;
+import com.securepreferences.SecurePreferences;
 
 public class SettingsActivity extends PreferenceActivity {
     @Override
@@ -23,11 +26,35 @@ public class SettingsActivity extends PreferenceActivity {
                         super.onPositive(dialog);
                         new deleteAllMessages().execute();
                     }
+                }).build();
+                pd.show();
+                return true;
+            }
+        });
 
+        findPreference("pref_reregister").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                MaterialDialog pd;
+                pd = new MaterialDialog.Builder(SettingsActivity.this).title("Register").content("Delete data and register again?").cancelable(false).positiveText("Yes").negativeText("No").callback(new MaterialDialog.ButtonCallback() {
                     @Override
-                    public void onNegative(MaterialDialog dialog) {
-                        super.onNegative(dialog);
+                    public void onPositive(MaterialDialog dialog) {
+                        super.onPositive(dialog);
+                        new deleteAllMessages().execute();
+                        SecurePreferences sp = new SecurePreferences(SettingsActivity.this);
+                        // if (!sp.getString(Consts.REGISTER_LOGIN_ID, "0").equals("0") && !sp.getString(Consts.REGISTER_USER_GROUP, "0").equals("0") && !sp.getString(Consts.REGISTER_MOBILE_NUMBER, "0").equals("0") && !sp.getString(Consts.REGISTER_USER_NAME, "0").equals("0") && !sp.getString(Consts.REGISTER_PASSWORD, "0").equals("0") && !sp.getString(Consts.REGISTER_UDID, "0").equals("0")) {
+                        sp.edit().remove(Consts.REGISTER_LOGIN_ID).commit();
+                        sp.edit().remove(Consts.REGISTER_MOBILE_NUMBER).commit();
+                        sp.edit().remove(Consts.REGISTER_PASSWORD).commit();
+                        sp.edit().remove(Consts.REGISTER_UDID).commit();
+                        sp.edit().remove(Consts.REGISTER_USER_GROUP).commit();
+                        sp.edit().remove(Consts.REGISTER_USER_NAME).commit();
+                        Intent data = new Intent();
+                        data.setData(Uri.parse(Consts.SETTINGS_RESTART));
+                        setResult(RESULT_OK, data);
+                        finish();
                     }
+
                 }).build();
                 pd.show();
                 return true;
@@ -51,7 +78,6 @@ public class SettingsActivity extends PreferenceActivity {
             if (pd != null && pd.isShowing()) {
                 pd.dismiss();
             }
-
         }
 
         @Override

@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="10dp"
     android:orientation="vertical">
 
     <ImageView
@@ -14,67 +15,64 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:src="@drawable/ic_launcher" />
+        android:src="@drawable/smrt_logo" />
 
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@+id/etPhoneNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/imageView"
         android:ems="10"
-        android:text="97307191"
         android:hint="Mobile Number"
         android:inputType="phone"
-        android:textSize="30sp"
+        android:textSize="15sp"
         app:baseColor="@android:color/background_dark"
         app:floatingLabel="highlight"
         app:maxCharacters="8"
         app:primaryColor="?colorAccent"
         app:singleLineEllipsis="true"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_alignLeft="@+id/etLoginId"
-        android:layout_alignStart="@+id/etLoginId"
-        android:layout_alignRight="@+id/etPassword"
-        android:layout_alignEnd="@+id/etPassword" />
+        android:layout_below="@+id/imageView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/imageView"
+        android:layout_alignEnd="@+id/imageView" />
 
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@+id/etLoginId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/etPhoneNumber"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
         android:hint="Username"
-        android:textSize="30sp"
-        android:text="cytho"
+        android:textSize="15sp"
         app:baseColor="@android:color/background_dark"
         app:floatingLabel="highlight"
         app:maxCharacters="20"
         app:primaryColor="?colorAccent"
         app:singleLineEllipsis="true"
-        android:layout_below="@+id/etPhoneNumber"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_alignLeft="@+id/etPassword"
-        android:layout_alignStart="@+id/etPassword"
-        android:layout_alignRight="@+id/etPassword"
-        android:layout_alignEnd="@+id/etPassword" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@+id/etPassword"
         android:layout_width="wrap_content"
-        android:text="pass"
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="Password"
         android:inputType="textPassword"
-        android:textSize="30sp"
+        android:textSize="15sp"
         app:baseColor="@android:color/background_dark"
         app:floatingLabel="highlight"
         app:maxCharacters="20"
         app:primaryColor="?colorAccent"
         app:singleLineEllipsis="true"
         android:layout_below="@+id/etLoginId"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="10dp" />
+        android:layout_alignLeft="@+id/etLoginId"
+        android:layout_alignStart="@+id/etLoginId"
+        android:layout_alignRight="@+id/etLoginId"
+        android:layout_alignEnd="@+id/etLoginId" />
 
     <info.hoang8f.widget.FButton
         android:id="@+id/bRegister"
@@ -87,11 +85,9 @@
         app:shadowEnabled="true"
         app:shadowHeight="5dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignLeft="@+id/etPassword"
+        android:layout_alignStart="@+id/etPassword"
+        android:layout_alignRight="@+id/etPassword"
+        android:layout_alignEnd="@+id/etPassword" />
 
 </RelativeLayout>

@@ -1,25 +1,26 @@
 package com.netlynxtech.gdsfileupload;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.manuelpeinado.multichoiceadapter.extras.actionbarcompat.MultiChoiceBaseAdapter;
 import com.melnykov.fab.FloatingActionButton;
 import com.netlynxtech.gdsfileupload.adapter.TimelineAdapter;
 import com.netlynxtech.gdsfileupload.classes.SQLFunctions;
 import com.netlynxtech.gdsfileupload.classes.Timeline;
-import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,7 +38,8 @@ public class MainActivity extends ActionBarActivity {
 
     String pictureDirectory = "";
     ArrayList<Timeline> data = new ArrayList<Timeline>();
-    TimelineAdapter adapter;
+    MultiChoiceBaseAdapter adapter;
+    Bundle saveInstanceState;
 
     @Override
     protected void onResume() {
@@ -57,6 +59,7 @@ public class MainActivity extends ActionBarActivity {
             }
         });
         fab.attachToListView(lvTimeline);
+        this.saveInstanceState = savedInstanceState;
     }
 
     private class loadTimeline extends AsyncTask<Void, Void, Void> {
@@ -76,8 +79,22 @@ public class MainActivity extends ActionBarActivity {
             MainActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    adapter = new TimelineAdapter(MainActivity.this, data);
+                    adapter = new TimelineAdapter(saveInstanceState, MainActivity.this, data);
                     lvTimeline.setAdapter(adapter);
+                    //adapter.setAdapterView(lvTimeline);
+                    lvTimeline.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
+                            new MaterialDialog.Builder(MainActivity.this).title("Resend").content("Resend photo?").negativeText("No").positiveText("Yes").callback(new MaterialDialog.ButtonCallback() {
+                                @Override
+                                public void onPositive(MaterialDialog dialog) {
+                                    super.onPositive(dialog);
+                                    Timeline item = data.get(i);
+                                    startActivity(new Intent(MainActivity.this, NewTimelineItemActivity.class).putExtra(Consts.IMAGE_STRING_BASE64_PASS_EXTRAS, item.getImage()));
+                                }
+                            }).build().show();
+                        }
+                    });
                 }
             });
         }
@@ -106,7 +123,10 @@ public class MainActivity extends ActionBarActivity {
                                 startActivityForResult(i, Consts.CAMERA_PHOTO_REQUEST);
                                 break;
                             case 2: //pick gallery
-                                Crop.pickImage(MainActivity.this);
+                                Intent intent = new Intent();
+                                intent.setType("image/*");
+                                intent.setAction(Intent.ACTION_GET_CONTENT);
+                                startActivityForResult(Intent.createChooser(intent, "Select Picture"), Consts.CAMERA_PICK_IMAGE_FROM_GALLERY);
                                 break;
                         }
                     }
@@ -116,27 +136,21 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Consts.CAMERA_PHOTO_REQUEST) {
-            if (resultCode == RESULT_OK) {
-                Uri source = Uri.fromFile(new File(Environment
-                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).toString(), pictureDirectory));
-                Uri outputUri = Uri.fromFile(new File(getCacheDir(), System.currentTimeMillis() + ".jpg"));
-                new Crop(source).output(outputUri).asSquare().start(MainActivity.this);
-            }
-        } else if (requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK) {
-            Uri outputUri = Uri.fromFile(new File(getCacheDir(), System.currentTimeMillis() + ""));
-            new Crop(data.getData()).output(outputUri).asSquare().start(this);
-        } else if (requestCode == Crop.REQUEST_CROP) {
-            handleCrop(resultCode, data);
-        }
-    }
-
-    private void handleCrop(int resultCode, Intent result) {
-        if (resultCode == RESULT_OK) {
-            Toast.makeText(MainActivity.this, Crop.getOutput(result).toString(), Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(MainActivity.this, NewTimelineItemActivity.class).putExtra(Consts.NEW_GALLERY_IMAGE_CROP_LIB_PASS_EXTRA, Crop.getOutput(result).toString()));
-        } else if (resultCode == Crop.RESULT_ERROR) {
-            Toast.makeText(this, Crop.getError(result).getMessage().toString(), Toast.LENGTH_SHORT).show();
+        if (requestCode == Consts.CAMERA_PHOTO_REQUEST && resultCode == RESULT_OK) {
+            startActivity(new Intent(MainActivity.this, NewTimelineItemActivity.class).putExtra(Consts.IMAGE_CAMERA_PASS_EXTRAS, pictureDirectory));
+        } else if (requestCode == Consts.CAMERA_PICK_IMAGE_FROM_GALLERY && resultCode == RESULT_OK) {
+            Uri _uri = data.getData();
+            Cursor cursor = getContentResolver().query(_uri, new String[]{android.provider.MediaStore.Images.ImageColumns.DATA}, null, null, null);
+            cursor.moveToFirst();
+            final String imageFilePath = cursor.getString(0);
+            cursor.close();
+            Toast.makeText(MainActivity.this, imageFilePath.toString(), Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(MainActivity.this, NewTimelineItemActivity.class).putExtra(Consts.IMAGE_GALLERY_PASS_EXTRAS, imageFilePath));
+        } else if (requestCode == Consts.SETTING_RESTART_CODE && resultCode == RESULT_OK) {
+            Intent i = new Intent(MainActivity.this, RegisterActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+            finish();
         }
     }
 
@@ -148,18 +162,14 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(Consts.CAMERA_SAVED_INSTANCE, pictureDirectory);
+        adapter.save(outState);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.menu_settings) {
-            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+            startActivityForResult(new Intent(MainActivity.this, SettingsActivity.class), Consts.SETTING_RESTART_CODE);
             return true;
         }
 

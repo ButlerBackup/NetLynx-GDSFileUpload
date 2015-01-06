@@ -4,34 +4,80 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.support.v7.view.ActionMode;
 import android.util.Base64;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.manuelpeinado.multichoiceadapter.extras.actionbarcompat.MultiChoiceBaseAdapter;
 import com.netlynxtech.gdsfileupload.FullScreenImageActivity;
 import com.netlynxtech.gdsfileupload.R;
+import com.netlynxtech.gdsfileupload.classes.SQLFunctions;
 import com.netlynxtech.gdsfileupload.classes.Timeline;
 
 import net.koofr.android.timeago.TimeAgo;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class TimelineAdapter extends BaseAdapter {
+public class TimelineAdapter extends MultiChoiceBaseAdapter {
     Context context;
     ArrayList<Timeline> data;
     private static LayoutInflater inflater = null;
 
-    public TimelineAdapter(Context context, ArrayList<Timeline> data) {
+    public TimelineAdapter(Bundle savedInstanceState, Context context, ArrayList<Timeline> data) {
+        super(savedInstanceState);
         this.context = context;
         this.data = data;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
+
+    @Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.menu_timeline_longpress, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        if (item.getItemId() == R.id.menu_discard) {
+            discardSelectedItems();
+            return true;
+        }
+        return false;
+    }
+
+    private void discardSelectedItems() {
+        // http://stackoverflow.com/a/4950905/244576
+        Set<Long> selection = getCheckedItems();
+        ArrayList<Timeline> items = new ArrayList<>();
+        for (long position : selection) {
+            items.add(getItem((int) position));
+        }
+        SQLFunctions sql = new SQLFunctions(context);
+        sql.open();
+        for (Timeline item : items) {
+            sql.deleteTimelineItem(item.getId());
+            data.remove(item);
+        }
+        sql.close();
+        finishActionMode();
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false;
     }
 
     @Override
@@ -40,7 +86,7 @@ public class TimelineAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int i) {
+    public Timeline getItem(int i) {
         return data.get(i);
     }
 
@@ -65,7 +111,7 @@ public class TimelineAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup parent) {
+    public View getViewImpl(int i, View view, ViewGroup parent) {
         ViewHolder holder;
         if (view == null) {
             view = inflater.inflate(R.layout.activity_timeline_item, parent, false);

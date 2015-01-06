@@ -13,10 +13,10 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
         android:layout_marginBottom="20dp"
         android:adjustViewBounds="true"
-        android:scaleType="centerInside" />
+        android:scaleType="centerInside"
+        android:layout_below="@+id/tvGetLocation" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -24,7 +24,6 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Loading location.."
         android:id="@+id/tvGetLocation"
-        android:layout_below="@+id/CropImageView"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"

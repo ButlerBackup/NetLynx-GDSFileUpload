@@ -14,7 +14,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:src="@drawable/ic_launcher" />
+        android:src="@drawable/smrt_logo" />
 
     <TextView
         android:id="@+id/textView"
@@ -47,16 +47,17 @@
         android:id="@+id/bVerifyPin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/etPin"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/etPin"
-        android:layout_margin="10dp"
         android:text="Verify PIN"
         app:buttonColor="@color/fbutton_default_color"
         app:cornerRadius="0dp"
         app:shadowColor="@color/fbutton_default_shadow_color"
         app:shadowEnabled="true"
-        app:shadowHeight="5dp" />
+        app:shadowHeight="5dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>

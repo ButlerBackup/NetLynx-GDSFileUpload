@@ -2,16 +2,13 @@ package com.netlynxtech.gdsfileupload.classes;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
 
+import com.netlynxtech.gdsfileupload.Consts;
 import com.securepreferences.SecurePreferences;
 
 import java.io.ByteArrayOutputStream;
-import java.util.UUID;
-
-import com.netlynxtech.gdsfileupload.Consts;
 
 /**
  * Created by Probook2 on 30/12/2014.
@@ -52,6 +49,11 @@ public class Utils {
         return false;
     }
 
+    public void storeUnique(String gcmid) {
+        SecurePreferences sp = new SecurePreferences(context);
+        sp.edit().putString(Consts.REGISTER_UDID, gcmid).commit();
+    }
+
     public String getUnique() {
         SecurePreferences sp = new SecurePreferences(context);
         if (Consts.DEBUG) {
@@ -60,20 +62,8 @@ public class Utils {
         }
         if (!sp.getString(Consts.REGISTER_UDID, "0").equals("0")) {
             return sp.getString(Consts.REGISTER_UDID, "0");
-        } else {
-            final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-
-            final String tmDevice, tmSerial, androidId;
-            tmDevice = "" + tm.getDeviceId();
-            tmSerial = "" + tm.getSimSerialNumber();
-            androidId = "" + android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-
-            UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
-            String deviceId = deviceUuid.toString();
-            Log.e("Unique ID", deviceId);
-            sp.edit().putString(Consts.REGISTER_UDID, deviceId).commit();
-            return deviceId;
         }
+        return "";
     }
 
     public String convertBitmapToString(Bitmap bmp) {

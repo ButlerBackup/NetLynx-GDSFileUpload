@@ -16,13 +16,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".NewTimelineItemActivity" />
+        <activity
+            android:name=".NewTimelineItemActivity"
+            android:windowSoftInputMode="adjustResize" />
         <activity android:name=".MainActivity" />
         <activity android:name=".VerifyPinActivity" />
         <activity android:name=".RegistrationDoneActivity" />
         <activity android:name=".FullScreenImageActivity" />
         <activity android:name=".SettingsActivity" />
-        <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
 
         <service android:name="com.littlefluffytoys.littlefluffylocationlibrary.LocationBroadcastService" />
 
@@ -43,7 +44,10 @@
                     android:exported="false" />
             </intent-filter>
         </receiver>
-        <meta-data android:name="com.crashlytics.ApiKey" android:value="c3d209b76117254253c9ff1ad725518e538ea6e3"/>
+
+        <meta-data
+            android:name="com.crashlytics.ApiKey"
+            android:value="c3d209b76117254253c9ff1ad725518e538ea6e3" />
     </application>
 
     <uses-permission android:name="android.permission.CAMERA" />
@@ -61,8 +65,16 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />\
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
+    <permission
+        android:name="com.netlynxtech.gdsfileupload.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.netlynxtech.gdsfileupload.permission.C2D_MESSAGE" />
+    <meta-data
+        android:name="com.google.android.gms.version"
+        android:value="@integer/google_play_services_version" />
 
     <uses-feature
         android:name="android.hardware.camera"
