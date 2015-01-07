@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -21,6 +20,7 @@ import com.melnykov.fab.FloatingActionButton;
 import com.netlynxtech.gdsfileupload.adapter.TimelineAdapter;
 import com.netlynxtech.gdsfileupload.classes.SQLFunctions;
 import com.netlynxtech.gdsfileupload.classes.Timeline;
+import com.netlynxtech.gdsfileupload.classes.Utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -90,7 +90,7 @@ public class MainActivity extends ActionBarActivity {
                                 public void onPositive(MaterialDialog dialog) {
                                     super.onPositive(dialog);
                                     Timeline item = data.get(i);
-                                    startActivity(new Intent(MainActivity.this, NewTimelineItemActivity.class).putExtra(Consts.IMAGE_STRING_BASE64_PASS_EXTRAS, item.getImage()));
+                                    startActivity(new Intent(MainActivity.this, NewTimelineItemActivity.class).putExtra(Consts.IMAGE_SELECTED_FROM_MAINACTIVITY, item.getImage()));
                                 }
                             }).build().show();
                         }
@@ -115,18 +115,30 @@ public class MainActivity extends ActionBarActivity {
                         switch (which) {
                             case 0: // take photo
                                 Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                File dir = Environment
-                                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-                                pictureDirectory = System.currentTimeMillis() + ".jpg";
-                                File output = new File(dir, pictureDirectory);
-                                i.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(output));
-                                startActivityForResult(i, Consts.CAMERA_PHOTO_REQUEST);
+                                if (!new Utils(MainActivity.this).createFolder().equals("")) {
+                                    pictureDirectory = System.currentTimeMillis() + "";
+                                    File output = new File(new Utils(MainActivity.this).createFolder(), pictureDirectory);
+                                    i.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(output));
+                                    startActivityForResult(i, Consts.CAMERA_PHOTO_REQUEST);
+                                } else {
+                                    Toast.makeText(MainActivity.this, "Unable to create folder", Toast.LENGTH_SHORT).show();
+                                }
+                                break;
+                            case 1: //take video
+                                Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+                                if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
+                                    startActivityForResult(takeVideoIntent, Consts.CAMERA_VIDEO_REQUEST);
+                                }
                                 break;
                             case 2: //pick gallery
-                                Intent intent = new Intent();
-                                intent.setType("image/*");
-                                intent.setAction(Intent.ACTION_GET_CONTENT);
-                                startActivityForResult(Intent.createChooser(intent, "Select Picture"), Consts.CAMERA_PICK_IMAGE_FROM_GALLERY);
+                                if (!new Utils(MainActivity.this).createFolder().equals("")) {
+                                    Intent intent = new Intent();
+                                    intent.setType("image/*");
+                                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                                    startActivityForResult(Intent.createChooser(intent, "Select Picture"), Consts.CAMERA_PICK_IMAGE_FROM_GALLERY);
+                                } else {
+                                    Toast.makeText(MainActivity.this, "Unable to create folder", Toast.LENGTH_SHORT).show();
+                                }
                                 break;
                         }
                     }
@@ -151,6 +163,8 @@ public class MainActivity extends ActionBarActivity {
             i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
             finish();
+        } else if (requestCode == Consts.CAMERA_VIDEO_REQUEST && resultCode == RESULT_OK ) {
+            Uri videoUri = data.getData();
         }
     }
 

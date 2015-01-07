@@ -7,6 +7,11 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Base64;
 import android.view.MenuItem;
 
+import com.netlynxtech.gdsfileupload.classes.Utils;
+import com.squareup.picasso.Picasso;
+
+import java.io.File;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import it.sephiroth.android.library.imagezoom.ImageViewTouch;
@@ -22,9 +27,7 @@ public class FullScreenImageActivity extends ActionBarActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         setContentView(R.layout.activity_fullscreen_image);
         ButterKnife.inject(FullScreenImageActivity.this);
-        byte[] decodedString = Base64.decode(getIntent().getStringExtra("image"), Base64.DEFAULT);
-        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        ivImageZoom.setImageBitmap(decodedByte);
+        Picasso.with(FullScreenImageActivity.this).load(new File(new Utils(FullScreenImageActivity.this).createFolder(), getIntent().getStringExtra("image"))).into(ivImageZoom);
     }
 
     @Override

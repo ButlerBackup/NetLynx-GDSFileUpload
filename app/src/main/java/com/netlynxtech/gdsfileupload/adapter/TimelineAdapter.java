@@ -2,11 +2,9 @@ package com.netlynxtech.gdsfileupload.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.view.ActionMode;
-import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,9 +19,12 @@ import com.netlynxtech.gdsfileupload.FullScreenImageActivity;
 import com.netlynxtech.gdsfileupload.R;
 import com.netlynxtech.gdsfileupload.classes.SQLFunctions;
 import com.netlynxtech.gdsfileupload.classes.Timeline;
+import com.netlynxtech.gdsfileupload.classes.Utils;
+import com.squareup.picasso.Picasso;
 
 import net.koofr.android.timeago.TimeAgo;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -133,9 +134,13 @@ public class TimelineAdapter extends MultiChoiceBaseAdapter {
         holder.tvLocation.setText(location);
         holder.tvTime.setText(TimeAgo.timeAgo(context, t.getUnixTime()));
         if (!t.getImage().equals("")) {
-            byte[] decodedString = Base64.decode(t.getImage(), Base64.DEFAULT);
-            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-            holder.ivTimelineImage.setImageBitmap(decodedByte);
+            File image = new File(new Utils(context).createThumbnailFolder(), t.getImage() + "_thumbnail");
+            if (image.exists()) {
+                Picasso.with(context).load(image).placeholder(R.drawable.ic_launcher).error(R.drawable.smrt_logo).into(holder.ivTimelineImage);
+            } else {
+                Log.e("DOESNT EXIST", "DOESNT EXIST");
+            }
+            Log.e("Thumbnail", image.getAbsolutePath().toString());
         }
         holder.ivTimelineImage.setOnClickListener(new View.OnClickListener() {
             @Override

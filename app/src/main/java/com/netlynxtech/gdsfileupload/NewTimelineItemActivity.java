@@ -8,12 +8,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,13 +27,15 @@ import com.littlefluffytoys.littlefluffylocationlibrary.LocationInfo;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
 import com.netlynxtech.gdsfileupload.apiclasses.SubmitMessage;
-import com.netlynxtech.gdsfileupload.classes.MyLocation;
 import com.netlynxtech.gdsfileupload.classes.SQLFunctions;
 import com.netlynxtech.gdsfileupload.classes.Timeline;
 import com.netlynxtech.gdsfileupload.classes.Utils;
 import com.netlynxtech.gdsfileupload.classes.WebAPIOutput;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
@@ -56,9 +57,8 @@ public class NewTimelineItemActivity extends ActionBarActivity {
 
     File imgFile;
     Bitmap croppedImage;
-    MyLocation myLocation;
     LocationInfo currentLocation;
-    boolean isBase64StringImage = false;
+    boolean isResendingPhoto = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,24 +69,33 @@ public class NewTimelineItemActivity extends ActionBarActivity {
         ButterKnife.inject(NewTimelineItemActivity.this);
         if (getIntent().hasExtra(Consts.IMAGE_CAMERA_PASS_EXTRAS)) {
             pictureFileName = getIntent().getStringExtra(Consts.IMAGE_CAMERA_PASS_EXTRAS);
-            imgFile = new File(Environment
-                    .getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), pictureFileName);
+            imgFile = new File(new Utils(NewTimelineItemActivity.this).createFolder(), pictureFileName);
             Log.e("FILENAME", imgFile.getAbsolutePath().toString());
             loadImageFile();
         } else if (getIntent().hasExtra(Consts.IMAGE_GALLERY_PASS_EXTRAS)) {
+            String currentTime = System.currentTimeMillis() + "";
             pictureFileName = getIntent().getStringExtra(Consts.IMAGE_GALLERY_PASS_EXTRAS);
             Uri uriPath = Uri.parse(pictureFileName);
-            imgFile = new File(uriPath.getPath());
+            File tempFile = new File(uriPath.getPath());
             Log.e("FILENAME", uriPath.getPath());
+            File destination = new File(new Utils(NewTimelineItemActivity.this).createFolder(), currentTime);
+            try {
+                FileUtils.copyFile(tempFile, destination);
+                imgFile = new File(new Utils(NewTimelineItemActivity.this).createFolder(), currentTime);
+                loadImageFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(NewTimelineItemActivity.this, "Failed to copy file to GDSFolder", Toast.LENGTH_SHORT).show();
+            }
+        } else if (getIntent().hasExtra(Consts.IMAGE_SELECTED_FROM_MAINACTIVITY)) {
+            pictureFileName = getIntent().getStringExtra(Consts.IMAGE_SELECTED_FROM_MAINACTIVITY);
+            imgFile = new File(new Utils(NewTimelineItemActivity.this).createFolder(), pictureFileName);
+            isResendingPhoto = true;
             loadImageFile();
-        } else if (getIntent().hasExtra(Consts.IMAGE_STRING_BASE64_PASS_EXTRAS)) {
-            pictureFileName = getIntent().getStringExtra(Consts.IMAGE_STRING_BASE64_PASS_EXTRAS);
-            isBase64StringImage = true;
-            loadBase64Image();
         } else {
             finish();
         }
-
+        tvGetLocation.setText("Loading location..");
         LocationLibrary.forceLocationUpdate(NewTimelineItemActivity.this);
         refreshLocation(new LocationInfo(NewTimelineItemActivity.this));
         final IntentFilter lftIntentFilter = new IntentFilter(LocationLibraryConstants.getLocationChangedPeriodicBroadcastAction());
@@ -96,17 +105,12 @@ public class NewTimelineItemActivity extends ActionBarActivity {
     private void loadImageFile() {
         if (imgFile.exists()) {
             Log.e("File Size", imgFile.length() + "");
-            croppedImage = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            Log.e("File Directory", imgFile.getAbsolutePath().toString());
+            croppedImage = Utils.decodeSampledBitmapFromResource(imgFile);
             ivNewTimelineImage.setImageBitmap(croppedImage);
         } else {
             new SnackBar.Builder(NewTimelineItemActivity.this).withMessage("NO IMAGE").withStyle(SnackBar.Style.ALERT).withDuration(SnackBar.LONG_SNACK).show();
         }
-    }
-
-    private void loadBase64Image() {
-        byte[] decodedString = Base64.decode(pictureFileName, Base64.DEFAULT);
-        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        ivNewTimelineImage.setImageBitmap(decodedByte);
     }
 
     @OnClick(R.id.tvGetLocation)
@@ -179,7 +183,7 @@ public class NewTimelineItemActivity extends ActionBarActivity {
                                 Timeline t = new Timeline();
                                 t.setUnixTime((System.currentTimeMillis() / 1000L) + "");
                                 t.setMessage(etDescription.getText().toString().trim());
-                                t.setImage(bitmapString);
+                                t.setImage(imgFile.getName().toString());
                                 t.setVideo("");
                                 t.setLocation(!locationName.equals("") ? locationName : "");
                                 if (currentLocation == null) {
@@ -211,12 +215,7 @@ public class NewTimelineItemActivity extends ActionBarActivity {
         protected Void doInBackground(Void... voids) {
             try {
                 Utils u = new Utils(NewTimelineItemActivity.this);
-                if (!isBase64StringImage) {
-                    bitmapString = u.convertBitmapToString(croppedImage);
-                    Log.e("File Size", (croppedImage.getRowBytes() * croppedImage.getHeight()) + "");
-                } else {
-                    bitmapString = pictureFileName;
-                }
+                bitmapString = u.convertBitmapToString(croppedImage);
                 SubmitMessage m;
                 if (currentLocation != null) {
                     Geocoder geocoder = new Geocoder(NewTimelineItemActivity.this, Locale.getDefault());
@@ -228,20 +227,16 @@ public class NewTimelineItemActivity extends ActionBarActivity {
                         locationName = cityName + " " + stateName + " " + countryName;
                         Log.e("Location", locationName);
                     }
-                    if (!isBase64StringImage) {
-                        m = new SubmitMessage(u.getUnique(), etDescription.getText().toString().trim(), imgFile.getName(), bitmapString, Float.toString(currentLocation.lastLat), Float.toString(currentLocation.lastLong));
-                    } else {
-                        m = new SubmitMessage(u.getUnique(), etDescription.getText().toString().trim(), System.currentTimeMillis() + ".jpg", bitmapString, Float.toString(currentLocation.lastLat), Float.toString(currentLocation.lastLong));
-                    }
+                    m = new SubmitMessage(u.getUnique(), etDescription.getText().toString().trim(), imgFile.getName() + ".jpg", bitmapString, Float.toString(currentLocation.lastLat), Float.toString(currentLocation.lastLong));
                 } else {
-                    if (!isBase64StringImage) {
-                        m = new SubmitMessage(u.getUnique(), etDescription.getText().toString().trim(), imgFile.getName(), bitmapString, "", "");
-                    } else {
-                        m = new SubmitMessage(u.getUnique(), etDescription.getText().toString().trim(), System.currentTimeMillis() + ".jpg", bitmapString, "", "");
-                    }
+                    m = new SubmitMessage(u.getUnique(), etDescription.getText().toString().trim(), imgFile.getName() + ".jpg", bitmapString, "", "");
                 }
 
                 res = MainApplication.apiService.uploadContentWithMessage(m);
+                if (!isResendingPhoto) {
+                    Bitmap thumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(imgFile.getAbsolutePath().toString()), 180, 180);
+                    new Utils(NewTimelineItemActivity.this).saveImageToFolder(thumbnail, imgFile.getName().toString() + "_thumbnail");
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 // Toast.makeText(NewTimelineItemActivity.this, e.getMessage().toString(), Toast.LENGTH_LONG).show();
@@ -264,13 +259,6 @@ public class NewTimelineItemActivity extends ActionBarActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        // myLocation.cancelTimer();
         unregisterReceiver(lftBroadcastReceiver);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // myLocation.cancelTimer();
     }
 }
