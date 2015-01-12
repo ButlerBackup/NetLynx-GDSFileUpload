@@ -5,13 +5,15 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.crashlytics.android.Crashlytics;
-import com.github.mrengineer13.snackbar.SnackBar;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.netlynxtech.gdsfileupload.apiclasses.RegisterUser;
 import com.netlynxtech.gdsfileupload.classes.Utils;
@@ -44,6 +46,16 @@ public class RegisterActivity extends ActionBarActivity {
         }
         setContentView(R.layout.activity_register);
         ButterKnife.inject(this);
+        etPassword.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    bRegister.performClick();
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     @OnClick(R.id.bRegister)
@@ -51,7 +63,7 @@ public class RegisterActivity extends ActionBarActivity {
         if (etLoginId.getText().toString().length() > 0 && etPassword.getText().toString().length() > 0 && etPhoneNumber.getText().toString().length() > 0) {
             new registerUser().execute();
         } else {
-            new SnackBar.Builder(RegisterActivity.this).withMessage("Some fields are empty").withStyle(SnackBar.Style.ALERT).withDuration(SnackBar.LONG_SNACK).show();
+            Toast.makeText(RegisterActivity.this, "Some fields are empty", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -106,10 +118,10 @@ public class RegisterActivity extends ActionBarActivity {
                             startActivity(new Intent(RegisterActivity.this, VerifyPinActivity.class));
                             finish();
                         } else {
-                            new SnackBar.Builder(RegisterActivity.this).withMessage(res.getStatusDescription()).withStyle(SnackBar.Style.ALERT).withDuration(SnackBar.LONG_SNACK).show();
+                            Toast.makeText(RegisterActivity.this, res.getStatusDescription(), Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        new SnackBar.Builder(RegisterActivity.this).withMessage("Unable to retrieve GCM ID from Google").withStyle(SnackBar.Style.ALERT).withDuration(SnackBar.LONG_SNACK).show();
+                        Toast.makeText(RegisterActivity.this, "Unable to get GCM ID from Google", Toast.LENGTH_LONG).show();
                     }
                 }
             });

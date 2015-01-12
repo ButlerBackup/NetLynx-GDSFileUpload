@@ -9,6 +9,8 @@
         <item>Capture a photo</item>
         <item>Take a video</item>
         <item>Pick a photo from gallery</item>
+        <item>Pick a video from gallery</item>
+
     </string-array>
 
     <string-array name="nav">

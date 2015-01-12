@@ -22,7 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.github.mrengineer13.snackbar.SnackBar;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationInfo;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
@@ -109,7 +108,8 @@ public class NewTimelineItemActivity extends ActionBarActivity {
             croppedImage = Utils.decodeSampledBitmapFromResource(imgFile);
             ivNewTimelineImage.setImageBitmap(croppedImage);
         } else {
-            new SnackBar.Builder(NewTimelineItemActivity.this).withMessage("NO IMAGE").withStyle(SnackBar.Style.ALERT).withDuration(SnackBar.LONG_SNACK).show();
+            Toast.makeText(NewTimelineItemActivity.this, "No image found", Toast.LENGTH_LONG).show();
+
         }
     }
 
@@ -197,7 +197,7 @@ public class NewTimelineItemActivity extends ActionBarActivity {
                                 sql.close();
                                 finish();
                             } else {
-                                new SnackBar.Builder(NewTimelineItemActivity.this).withMessage(res.getStatusDescription()).withStyle(SnackBar.Style.ALERT).withDuration(SnackBar.LONG_SNACK).show();
+                                Toast.makeText(NewTimelineItemActivity.this, res.getStatusDescription(), Toast.LENGTH_LONG).show();
                             }
                         } else {
                             Log.e("Result", "There were no response from server");

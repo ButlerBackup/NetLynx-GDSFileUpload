@@ -4,11 +4,14 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.github.mrengineer13.snackbar.SnackBar;
 import com.netlynxtech.gdsfileupload.apiclasses.VerifyPin;
 import com.netlynxtech.gdsfileupload.classes.Utils;
 import com.netlynxtech.gdsfileupload.classes.WebAPIOutput;
@@ -28,6 +31,16 @@ public class VerifyPinActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_verify_pin);
         ButterKnife.inject(this);
+        etPin.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    bRegister.performClick();
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     @OnClick(R.id.bVerifyPin)
@@ -68,7 +81,7 @@ public class VerifyPinActivity extends ActionBarActivity {
                         startActivity(new Intent(VerifyPinActivity.this, RegistrationDoneActivity.class).putExtra(Consts.REGISTER_USER_NAME, res.getVerifyPinUsername()).putExtra(Consts.REGISTER_USER_GROUP, res.getVerifyPinUserGroup()));
                         finish();
                     } else {
-                        new SnackBar.Builder(VerifyPinActivity.this).withMessage(res.getStatusDescription()).withStyle(SnackBar.Style.ALERT).withDuration(SnackBar.LONG_SNACK).show();
+                        Toast.makeText(VerifyPinActivity.this, res.getStatusDescription(), Toast.LENGTH_LONG).show();
                     }
                 }
             });

@@ -3,24 +3,30 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="10dp">
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
         android:src="@drawable/smrt_logo" />
 
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@+id/etPhoneNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/imageView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/imageView"
+        android:layout_below="@+id/imageView"
         android:ems="10"
         android:hint="Mobile Number"
         android:inputType="phone"
@@ -29,36 +35,34 @@
         app:floatingLabel="highlight"
         app:maxCharacters="8"
         app:primaryColor="?colorAccent"
-        app:singleLineEllipsis="true"
-        android:layout_below="@+id/imageView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/imageView"
-        android:layout_alignEnd="@+id/imageView" />
+        app:singleLineEllipsis="true" />
 
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@+id/etLoginId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/etPhoneNumber"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/etPhoneNumber"
         android:layout_below="@+id/etPhoneNumber"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
         android:hint="Username"
         android:textSize="15sp"
         app:baseColor="@android:color/background_dark"
         app:floatingLabel="highlight"
         app:maxCharacters="20"
         app:primaryColor="?colorAccent"
-        app:singleLineEllipsis="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        app:singleLineEllipsis="true" />
 
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@+id/etPassword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/etLoginId"
+        android:layout_alignLeft="@+id/etLoginId"
+        android:layout_alignRight="@+id/etLoginId"
+        android:layout_alignStart="@+id/etLoginId"
+        android:layout_below="@+id/etLoginId"
         android:ems="10"
         android:hint="Password"
         android:inputType="textPassword"
@@ -67,27 +71,22 @@
         app:floatingLabel="highlight"
         app:maxCharacters="20"
         app:primaryColor="?colorAccent"
-        app:singleLineEllipsis="true"
-        android:layout_below="@+id/etLoginId"
-        android:layout_alignLeft="@+id/etLoginId"
-        android:layout_alignStart="@+id/etLoginId"
-        android:layout_alignRight="@+id/etLoginId"
-        android:layout_alignEnd="@+id/etLoginId" />
+        app:singleLineEllipsis="true" />
 
     <info.hoang8f.widget.FButton
         android:id="@+id/bRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/etPassword"
         android:text="Register"
         app:buttonColor="@color/fbutton_default_color"
         app:cornerRadius="0dp"
         app:shadowColor="@color/fbutton_default_shadow_color"
         app:shadowEnabled="true"
-        app:shadowHeight="5dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignLeft="@+id/etPassword"
-        android:layout_alignStart="@+id/etPassword"
-        android:layout_alignRight="@+id/etPassword"
-        android:layout_alignEnd="@+id/etPassword" />
+        app:shadowHeight="5dp" />
 
 </RelativeLayout>

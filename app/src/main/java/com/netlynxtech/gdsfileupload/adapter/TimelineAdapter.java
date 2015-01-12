@@ -2,20 +2,16 @@ package com.netlynxtech.gdsfileupload.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.support.v7.view.ActionMode;
-import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.manuelpeinado.multichoiceadapter.extras.actionbarcompat.MultiChoiceBaseAdapter;
 import com.netlynxtech.gdsfileupload.FullScreenImageActivity;
+import com.netlynxtech.gdsfileupload.MainActivity;
 import com.netlynxtech.gdsfileupload.R;
 import com.netlynxtech.gdsfileupload.classes.SQLFunctions;
 import com.netlynxtech.gdsfileupload.classes.Timeline;
@@ -26,59 +22,59 @@ import net.koofr.android.timeago.TimeAgo;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Set;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class TimelineAdapter extends MultiChoiceBaseAdapter {
+public class TimelineAdapter extends BaseAdapter {
     Context context;
     ArrayList<Timeline> data;
     private static LayoutInflater inflater = null;
+    private SparseBooleanArray mSelectedItemsIds;
 
-    public TimelineAdapter(Bundle savedInstanceState, Context context, ArrayList<Timeline> data) {
-        super(savedInstanceState);
+    public TimelineAdapter(Context context, ArrayList<Timeline> data) {
         this.context = context;
         this.data = data;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mSelectedItemsIds = new SparseBooleanArray();
     }
 
-    @Override
-    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        MenuInflater inflater = mode.getMenuInflater();
-        inflater.inflate(R.menu.menu_timeline_longpress, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-        if (item.getItemId() == R.id.menu_discard) {
-            discardSelectedItems();
-            return true;
-        }
-        return false;
-    }
-
-    private void discardSelectedItems() {
-        // http://stackoverflow.com/a/4950905/244576
-        Set<Long> selection = getCheckedItems();
-        ArrayList<Timeline> items = new ArrayList<>();
-        for (long position : selection) {
-            items.add(getItem((int) position));
-        }
+    public void remove(Timeline object) {
         SQLFunctions sql = new SQLFunctions(context);
         sql.open();
-        for (Timeline item : items) {
-            sql.deleteTimelineItem(item.getId());
-            data.remove(item);
-        }
+        sql.deleteTimelineItem(object.getId());
+        data.remove(object);
         sql.close();
-        finishActionMode();
+        notifyDataSetChanged();
     }
 
-    @Override
-    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-        return false;
+    public ArrayList<Timeline> getTimelineData() {
+        return data;
+    }
+
+    public void toggleSelection(int position) {
+        selectView(position, !mSelectedItemsIds.get(position));
+    }
+
+    public void removeSelection() {
+        mSelectedItemsIds = new SparseBooleanArray();
+        notifyDataSetChanged();
+    }
+
+    public void selectView(int position, boolean value) {
+        if (value)
+            mSelectedItemsIds.put(position, value);
+        else
+            mSelectedItemsIds.delete(position);
+        notifyDataSetChanged();
+    }
+
+    public int getSelectedCount() {
+        return mSelectedItemsIds.size();
+    }
+
+    public SparseBooleanArray getSelectedIds() {
+        return mSelectedItemsIds;
     }
 
     @Override
@@ -112,7 +108,7 @@ public class TimelineAdapter extends MultiChoiceBaseAdapter {
     }
 
     @Override
-    public View getViewImpl(int i, View view, ViewGroup parent) {
+    public View getView(int i, View view, ViewGroup parent) {
         ViewHolder holder;
         if (view == null) {
             view = inflater.inflate(R.layout.activity_timeline_item, parent, false);
@@ -138,9 +134,9 @@ public class TimelineAdapter extends MultiChoiceBaseAdapter {
             if (image.exists()) {
                 Picasso.with(context).load(image).placeholder(R.drawable.ic_launcher).error(R.drawable.smrt_logo).into(holder.ivTimelineImage);
             } else {
-                Log.e("DOESNT EXIST", "DOESNT EXIST");
+                // Log.e("DOESNT EXIST", "DOESNT EXIST");
             }
-            Log.e("Thumbnail", image.getAbsolutePath().toString());
+            // Log.e("Thumbnail", image.getAbsolutePath().toString());
         }
         holder.ivTimelineImage.setOnClickListener(new View.OnClickListener() {
             @Override
