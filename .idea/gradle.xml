@@ -11,9 +11,10 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/library_cropper" />
+            <option value="$PROJECT_DIR$/library_multichoice_abc" />
+            <option value="$PROJECT_DIR$/library_multichoice_main" />
             <option value="$PROJECT_DIR$/library_securepreferences" />
             <option value="$PROJECT_DIR$/library_timeago" />
-            <option value="$PROJECT_DIR$/material" />
           </set>
         </option>
       </GradleProjectSettings>

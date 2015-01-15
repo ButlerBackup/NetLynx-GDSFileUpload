@@ -1,11 +1,12 @@
 package com.netlynxtech.gdsfileupload;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Base64;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.VideoView;
 
 import com.netlynxtech.gdsfileupload.classes.Utils;
 import com.squareup.picasso.Picasso;
@@ -20,6 +21,9 @@ public class FullScreenImageActivity extends ActionBarActivity {
     @InjectView(R.id.ivImageZoom)
     ImageViewTouch ivImageZoom;
 
+    @InjectView(R.id.vvVideoZoom)
+    VideoView vvVideoZoom;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,7 +31,20 @@ public class FullScreenImageActivity extends ActionBarActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         setContentView(R.layout.activity_fullscreen_image);
         ButterKnife.inject(FullScreenImageActivity.this);
-        Picasso.with(FullScreenImageActivity.this).load(new File(new Utils(FullScreenImageActivity.this).createFolder(), getIntent().getStringExtra("image"))).into(ivImageZoom);
+        if (getIntent().hasExtra("image")) {
+            Picasso.with(FullScreenImageActivity.this).load(new File(new Utils(FullScreenImageActivity.this).createFolder(), getIntent().getStringExtra("image"))).into(ivImageZoom);
+            vvVideoZoom.setVisibility(View.GONE);
+        } else if (getIntent().hasExtra("video")) {
+            ivImageZoom.setVisibility(View.GONE);
+            vvVideoZoom.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mp.setLooping(true);
+                }
+            });
+            vvVideoZoom.setVideoURI(Uri.parse(new Utils(FullScreenImageActivity.this).createFolder() + "/" + getIntent().getStringExtra("video")));
+            vvVideoZoom.start();
+        }
     }
 
     @Override

@@ -8,12 +8,9 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.util.SparseBooleanArray;
-import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -26,6 +23,7 @@ import com.kbeanie.imagechooser.api.ImageChooserListener;
 import com.kbeanie.imagechooser.api.ImageChooserManager;
 import com.kbeanie.imagechooser.api.VideoChooserListener;
 import com.kbeanie.imagechooser.api.VideoChooserManager;
+import com.manuelpeinado.multichoiceadapter.extras.actionbarcompat.MultiChoiceBaseAdapter;
 import com.melnykov.fab.FloatingActionButton;
 import com.netlynxtech.gdsfileupload.adapter.TimelineAdapter;
 import com.netlynxtech.gdsfileupload.classes.SQLFunctions;
@@ -48,7 +46,7 @@ public class MainActivity extends ActionBarActivity {
 
     String pictureDirectory = "";
     ArrayList<Timeline> data = new ArrayList<Timeline>();
-    TimelineAdapter adapter;
+    MultiChoiceBaseAdapter adapter;
     Bundle saveInstanceState;
     String filePath;
     ImageChooserManager imageChooserManager;
@@ -92,10 +90,10 @@ public class MainActivity extends ActionBarActivity {
             MainActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    adapter = new TimelineAdapter(MainActivity.this, data);
+                    adapter = new TimelineAdapter(saveInstanceState, MainActivity.this, data);
                     lvTimeline.setAdapter(adapter);
-                    lvTimeline.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-                    lvTimeline.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    adapter.setAdapterView(lvTimeline);
+                    adapter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
                             new MaterialDialog.Builder(MainActivity.this).title("Resend").content("Resend photo?").negativeText("No").positiveText("Yes").callback(new MaterialDialog.ButtonCallback() {
@@ -103,60 +101,11 @@ public class MainActivity extends ActionBarActivity {
                                 public void onPositive(MaterialDialog dialog) {
                                     super.onPositive(dialog);
                                     Timeline item = data.get(i);
-                                    startActivity(new Intent(MainActivity.this, NewTimelineItemActivity.class).putExtra(Consts.IMAGE_SELECTED_FROM_MAINACTIVITY, item.getImage()));
+                                    Intent i = new Intent(MainActivity.this, NewTimelineItemPhotoActivity.class);
+                                    i.putExtra(Consts.TIMELINE_ITEM_SELECTED_FROM_MAINACTIVITY, item);
+                                    startActivity(i);
                                 }
                             }).build().show();
-                        }
-                    });
-                    lvTimeline.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
-
-                        @Override
-                        public void onItemCheckedStateChanged(ActionMode mode,
-                                                              int position, long id, boolean checked) {
-                            // Capture total checked items
-                            final int checkedCount = lvTimeline.getCheckedItemCount();
-                            // Set the CAB title according to total checked items
-                            mode.setTitle(checkedCount + " Selected");
-                            // Calls toggleSelection method from ListViewAdapter Class
-                            adapter.toggleSelection(position);
-                        }
-
-                        @Override
-                        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                            switch (item.getItemId()) {
-                                case R.id.menu_discard:
-                                    // Calls getSelectedIds method from ListViewAdapter Class
-                                    SparseBooleanArray selected = adapter
-                                            .getSelectedIds();
-                                    for (int i = (selected.size() - 1); i >= 0; i--) {
-                                        if (selected.valueAt(i)) {
-                                            Timeline selecteditem = adapter
-                                                    .getItem(selected.keyAt(i));
-                                            adapter.remove(selecteditem);
-                                        }
-                                    }
-                                    // Close CAB
-                                    mode.finish();
-                                    return true;
-                                default:
-                                    return false;
-                            }
-                        }
-
-                        @Override
-                        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                            mode.getMenuInflater().inflate(R.menu.menu_timeline_longpress, menu);
-                            return true;
-                        }
-
-                        @Override
-                        public void onDestroyActionMode(ActionMode mode) {
-                            adapter.removeSelection();
-                        }
-
-                        @Override
-                        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                            return false;
                         }
                     });
                 }
@@ -195,12 +144,13 @@ public class MainActivity extends ActionBarActivity {
                                     startActivityForResult(takeVideoIntent, Consts.CAMERA_VIDEO_REQUEST);
                                 }*/
                                 videoChooserManager = new VideoChooserManager(MainActivity.this,
-                                        ChooserType.REQUEST_CAPTURE_VIDEO, "gdsupload");
+                                        ChooserType.REQUEST_CAPTURE_VIDEO, "gdsupload", false);
                                 videoChooserManager.setVideoChooserListener(new VideoChooserListener() {
                                     @Override
                                     public void onVideoChosen(ChosenVideo chosenVideo) {
                                         if (chosenVideo != null) {
-                                            Log.e("CHose VIDEO", chosenVideo.getVideoFilePath());
+                                            Log.e("Chosen VIDEO", chosenVideo.getVideoFilePath());
+                                            startActivity(new Intent(MainActivity.this, NewTimelineItemVideoActivity.class).putExtra(Consts.VIDEO_CAMERA_PASS_EXTRAS, chosenVideo.getVideoFilePath()));
                                         }
                                     }
 
@@ -225,7 +175,7 @@ public class MainActivity extends ActionBarActivity {
                                         @Override
                                         public void onImageChosen(ChosenImage image) {
                                             if (image != null) {
-                                                startActivity(new Intent(MainActivity.this, NewTimelineItemActivity.class).putExtra(Consts.IMAGE_GALLERY_PASS_EXTRAS, image.getFilePathOriginal()));
+                                                startActivity(new Intent(MainActivity.this, NewTimelineItemPhotoActivity.class).putExtra(Consts.IMAGE_GALLERY_PASS_EXTRAS, image.getFilePathOriginal()));
                                             } else {
                                                 Log.e("Error", "Error");
                                             }
@@ -256,12 +206,13 @@ public class MainActivity extends ActionBarActivity {
                                 break;
                             case 3: //choose video from gallery
                                 videoChooserManager = new VideoChooserManager(MainActivity.this,
-                                        ChooserType.REQUEST_PICK_VIDEO);
+                                        ChooserType.REQUEST_PICK_VIDEO, false);
                                 videoChooserManager.setVideoChooserListener(new VideoChooserListener() {
                                     @Override
                                     public void onVideoChosen(ChosenVideo chosenVideo) {
                                         if (chosenVideo != null) {
                                             Log.e("Video path", chosenVideo.getVideoFilePath());
+                                            startActivity(new Intent(MainActivity.this, NewTimelineItemVideoActivity.class).putExtra(Consts.VIDEO_CAMERA_PASS_EXTRAS, chosenVideo.getVideoFilePath()));
                                         }
                                     }
 
@@ -288,7 +239,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Consts.CAMERA_PHOTO_REQUEST && resultCode == RESULT_OK) {
-            startActivity(new Intent(MainActivity.this, NewTimelineItemActivity.class).putExtra(Consts.IMAGE_CAMERA_PASS_EXTRAS, pictureDirectory));
+            startActivity(new Intent(MainActivity.this, NewTimelineItemPhotoActivity.class).putExtra(Consts.IMAGE_CAMERA_PASS_EXTRAS, pictureDirectory));
         } else if (requestCode == Consts.CAMERA_PICK_IMAGE_FROM_GALLERY && resultCode == RESULT_OK) {
             Uri _uri = data.getData();
             Cursor cursor = getContentResolver().query(_uri, new String[]{android.provider.MediaStore.Images.ImageColumns.DATA}, null, null, null);
@@ -296,7 +247,7 @@ public class MainActivity extends ActionBarActivity {
             final String imageFilePath = cursor.getString(0);
             cursor.close();
             Toast.makeText(MainActivity.this, imageFilePath.toString(), Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(MainActivity.this, NewTimelineItemActivity.class).putExtra(Consts.IMAGE_GALLERY_PASS_EXTRAS, imageFilePath));
+            startActivity(new Intent(MainActivity.this, NewTimelineItemPhotoActivity.class).putExtra(Consts.IMAGE_GALLERY_PASS_EXTRAS, imageFilePath));
         } else if (requestCode == Consts.SETTING_RESTART_CODE && resultCode == RESULT_OK) {
             Intent i = new Intent(MainActivity.this, RegisterActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -367,6 +318,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(Consts.CAMERA_SAVED_INSTANCE, pictureDirectory);
+        adapter.save(outState);
     }
 
     @Override

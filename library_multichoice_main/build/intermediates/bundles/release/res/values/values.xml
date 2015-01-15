@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- From: file:/C:/Users/Probook2/Desktop/GDSFileUpload/library_multichoice_main/res/values/mca__attrs.xml -->
+    <eat-comment/>
+    <attr format="reference" name="checkableImageViewStyle"/>
+    <attr format="reference" name="multiChoiceAdapterStyle"/>
+    <!-- From: file:/C:/Users/Probook2/Desktop/GDSFileUpload/library_multichoice_main/res/values/mca__colors.xml -->
+    <eat-comment/>
+    <color name="mca__holo_blue_light">#ff33b5e5</color>
+    <color name="mca__holo_blue_light_transparent">#7f33b5e5</color>
+    <color name="mca__list_item_bg_checked">@color/mca__holo_blue_light</color>
+    <color name="mca__list_item_bg_normal">@android:color/transparent</color>
+    <color name="mca__list_item_bg_pressed">@color/mca__holo_blue_light</color>
+    <declare-styleable name="CheckableImageView"><attr name="android:foreground"/></declare-styleable>
+    <declare-styleable name="MultiChoiceAdapter"><attr name="itemClickInActionMode"><enum name="selectItem" value="0"/><enum name="openItem" value="1"/></attr></declare-styleable>
+    <!-- From: file:/C:/Users/Probook2/Desktop/GDSFileUpload/library_multichoice_main/res/values/mca__dimens.xml -->
+    <eat-comment/>
+    <dimen name="mca__listPreferredItemPaddingLeft">6dip</dimen>
+    <!-- From: file:/C:/Users/Probook2/Desktop/GDSFileUpload/library_multichoice_main/res/values/mca__plurals.xml -->
+    <eat-comment/>
+    <plurals name="selected_items">
+        <item quantity="one">1 item selected</item>
+        <item quantity="other">%d items selected</item>
+    </plurals>
+    <!-- From: file:/C:/Users/Probook2/Desktop/GDSFileUpload/library_multichoice_main/res/values/mca__styles.xml -->
+    <eat-comment/>
+    <style name="MultiChoiceAdapter_DefaultCheckableImageViewStyle">
+        <item name="android:foreground">@drawable/mca__gallery_selector</item>
+    </style>
+    <style name="MultiChoiceAdapter_DefaultSelectedItemStyle">
+        <item name="itemClickInActionMode">selectItem</item>
+    </style>
+</resources>

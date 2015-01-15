@@ -1,9 +1,11 @@
 package com.netlynxtech.gdsfileupload.classes;
 
+import java.io.Serializable;
+
 /**
  * Created by Probook2 on 30/12/2014.
  */
-public class Timeline {
+public class Timeline implements Serializable {
     String id, unixTime, message, image, video, location, locationLat, locationLong;
 
     public String getId() {

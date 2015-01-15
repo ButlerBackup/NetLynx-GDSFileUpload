@@ -55,7 +55,7 @@ public class VerifyPinActivity extends ActionBarActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pd = new MaterialDialog.Builder(VerifyPinActivity.this).cancelable(false).title("Contacting server..").customView(R.layout.loading, false).build();
+            pd = new MaterialDialog.Builder(VerifyPinActivity.this).cancelable(false).title("Contacting server..").customView(R.layout.loading, true).build();
             pd.show();
         }
 

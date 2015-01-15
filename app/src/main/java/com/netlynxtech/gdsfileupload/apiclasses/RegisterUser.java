@@ -14,11 +14,14 @@ public class RegisterUser {
     String password;
     @SerializedName("UDID")
     String udid;
+    @SerializedName("MobileType")
+    String mobileType;
 
-    public RegisterUser(String mobile, String loginId, String password, String udid) {
+    public RegisterUser(String mobile, String loginId, String password, String udid, String mobileType) {
         this.mobile = mobile;
         this.loginId = loginId;
         this.password = password;
         this.udid = udid;
+        this.mobileType = mobileType;
     }
 }

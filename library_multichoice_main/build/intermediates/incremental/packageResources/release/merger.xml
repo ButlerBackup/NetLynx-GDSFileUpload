@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="main"><source path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\res"><file name="mca__gallery_selector" path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\res\drawable\mca__gallery_selector.xml" qualifiers="" type="drawable"/><file name="mca__grid_item_fg_pressed" path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\res\drawable\mca__grid_item_fg_pressed.xml" qualifiers="" type="drawable"/><file name="mca__list_item_selector" path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\res\drawable\mca__list_item_selector.xml" qualifiers="" type="drawable"/><file name="mca__simple_list_item_checkable_1" path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\res\layout\mca__simple_list_item_checkable_1.xml" qualifiers="" type="layout"/><file name="mca__simple_list_item_checkable_2" path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\res\layout\mca__simple_list_item_checkable_2.xml" qualifiers="" type="layout"/><file path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\res\values\mca__attrs.xml" qualifiers=""><declare-styleable name="MultiChoiceAdapter">
+
+        <!-- Defines what happens when an item is clicked and the action mode was already active -->
+        <attr name="itemClickInActionMode">
+
+            <!--
+                 Changes the selection state of the clicked item, just as if it had been 
+                 long clicked. This is what the native MULTICHOICE_MODAL mode of List does,
+                  and what almost every app does
+            -->
+            <enum name="selectItem" value="0"/>
+            <!--
+                 Opens the clicked item, just as if it had been clicked outside of the action 
+                 mode. This is what the Gmail app does
+            -->
+            <enum name="openItem" value="1"/>
+        </attr>
+    </declare-styleable><attr format="reference" name="multiChoiceAdapterStyle"/><attr format="reference" name="checkableImageViewStyle"/><declare-styleable name="CheckableImageView">
+        <attr name="android:foreground"/>
+    </declare-styleable></file><file path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\res\values\mca__colors.xml" qualifiers=""><color name="mca__holo_blue_light">#ff33b5e5</color><color name="mca__holo_blue_light_transparent">#7f33b5e5</color><color name="mca__list_item_bg_normal">@android:color/transparent</color><color name="mca__list_item_bg_pressed">@color/mca__holo_blue_light</color><color name="mca__list_item_bg_checked">@color/mca__holo_blue_light</color></file><file path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\res\values\mca__dimens.xml" qualifiers=""><dimen name="mca__listPreferredItemPaddingLeft">6dip</dimen></file><file path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\res\values\mca__plurals.xml" qualifiers=""><plurals name="selected_items">
+        <item quantity="one">1 item selected</item>
+        <item quantity="other">%d items selected</item>
+    </plurals></file><file path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\res\values\mca__styles.xml" qualifiers=""><style name="MultiChoiceAdapter_DefaultSelectedItemStyle">
+        <item name="itemClickInActionMode">selectItem</item>
+    </style><style name="MultiChoiceAdapter_DefaultCheckableImageViewStyle">
+        <item name="android:foreground">@drawable/mca__gallery_selector</item>
+    </style></file><file path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\res\values-tr\mca__plurals.xml" qualifiers="tr"><plurals name="selected_items">
+        <item quantity="other">%d tane selçildi</item>
+    </plurals></file></source><source path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\build\generated\res\rs\release"/><source path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\build\generated\res\generated\release"/></dataSet><dataSet config="release"><source path="C:\Users\Probook2\Desktop\GDSFileUpload\library_multichoice_main\src\release\res"/></dataSet><mergedItems><configuration qualifiers=""><declare-styleable name="CheckableImageView"><attr name="android:foreground"/></declare-styleable><declare-styleable name="MultiChoiceAdapter"><attr name="itemClickInActionMode"><enum name="selectItem" value="0"/><enum name="openItem" value="1"/></attr></declare-styleable></configuration></mergedItems></merger>

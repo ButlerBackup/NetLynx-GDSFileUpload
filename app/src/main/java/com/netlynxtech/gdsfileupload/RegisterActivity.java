@@ -75,22 +75,23 @@ public class RegisterActivity extends ActionBarActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pd = new MaterialDialog.Builder(RegisterActivity.this).cancelable(false).title("Contacting server..").customView(R.layout.loading, false).build();
+            pd = new MaterialDialog.Builder(RegisterActivity.this).cancelable(false).title("Contacting server..").customView(R.layout.loading, true).build();
             pd.show();
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                if (gcm == null) {
+                /*if (gcm == null) {
                     gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
                 }
-                regid = gcm.register(PROJECT_NUMBER);
+                regid = gcm.register(PROJECT_NUMBER);*/
+                regid = "11111111";
                 Log.e("GCM", regid);
                 // RegisterUser user = new RegisterUser(etPhoneNumber.getText().toString(), etLoginId.getText().toString(), etPassword.getText().toString(), new Utils(RegisterActivity.this).getUnique());
                 if (regid != null && regid.length() > 0) {
                     gcmIdSuccess = true;
-                    RegisterUser user = new RegisterUser(etPhoneNumber.getText().toString(), etLoginId.getText().toString(), etPassword.getText().toString(), regid);
+                    RegisterUser user = new RegisterUser(etPhoneNumber.getText().toString(), etLoginId.getText().toString(), etPassword.getText().toString(), regid, "1");
                     res = MainApplication.apiService.registerUser(user);
                 }
             } catch (Exception e) {
@@ -109,7 +110,7 @@ public class RegisterActivity extends ActionBarActivity {
                         pd.dismiss();
                     }
                     if (gcmIdSuccess) {
-                        if (res != null && res.getStatusCode() == 1) {
+                        if (res != null && res.getStatusDescription() != null && res.getStatusCode() != 0) {
                             new Utils(RegisterActivity.this).storeUnique(regid);
                             Toast.makeText(RegisterActivity.this, res.getStatusDescription(), Toast.LENGTH_LONG).show();
                             new Utils(RegisterActivity.this).storeSecurePreferenceValue(Consts.REGISTER_MOBILE_NUMBER, etPhoneNumber.getText().toString());
@@ -118,7 +119,11 @@ public class RegisterActivity extends ActionBarActivity {
                             startActivity(new Intent(RegisterActivity.this, VerifyPinActivity.class));
                             finish();
                         } else {
-                            Toast.makeText(RegisterActivity.this, res.getStatusDescription(), Toast.LENGTH_LONG).show();
+                            if (res != null && res.getStatusDescription() != null) {
+                                Toast.makeText(RegisterActivity.this, res.getStatusDescription(), Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(RegisterActivity.this, "Internal error. Please try again", Toast.LENGTH_LONG).show();
+                            }
                         }
                     } else {
                         Toast.makeText(RegisterActivity.this, "Unable to get GCM ID from Google", Toast.LENGTH_LONG).show();

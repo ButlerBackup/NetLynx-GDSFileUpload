@@ -17,13 +17,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".NewTimelineItemActivity"
+            android:name=".NewTimelineItemVideoActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".NewTimelineItemPhotoActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".MainActivity" />
         <activity android:name=".VerifyPinActivity" />
         <activity android:name=".RegistrationDoneActivity" />
         <activity android:name=".FullScreenImageActivity" />
         <activity android:name=".SettingsActivity" />
+        <activity android:name=".AboutActivity" />
 
         <service android:name="com.littlefluffytoys.littlefluffylocationlibrary.LocationBroadcastService" />
 

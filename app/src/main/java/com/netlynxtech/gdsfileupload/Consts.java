@@ -12,12 +12,15 @@ public class Consts {
     public static final int SETTING_RESTART_CODE = 1340;
 
     public static final String CAMERA_SAVED_INSTANCE = "cameraPicture";
-    public static final String NEW_GALLERY_IMAGE_CROP_LIB_PASS_EXTRA = "galleryFileName";
-    public static final String NEW_CAMERA_IMAGE_CROP_LIB_PASS_EXTRA = "cameraFileName";
 
     public static final String IMAGE_GALLERY_PASS_EXTRAS = "galleryFileName";
     public static final String IMAGE_CAMERA_PASS_EXTRAS = "cameraFileName";
-    public static final String IMAGE_SELECTED_FROM_MAINACTIVITY = "imageFilePath";
+
+    public static final String VIDEO_GALLERY_PASS_EXTRAS = "galleryFileName";
+    public static final String VIDEO_CAMERA_PASS_EXTRAS = "cameraFileName";
+
+
+    public static final String TIMELINE_ITEM_SELECTED_FROM_MAINACTIVITY = "timelineItem";
     public static final String WEB_API_URL = "http://www.cloudmessage.me/svcFileUploadWebTier/svcFileUpload.svc";
 
     public static final String REGISTER_LOGIN_ID = "loginID";
@@ -28,4 +31,7 @@ public class Consts {
     public static final String REGISTER_USER_GROUP = "group";
 
     public static final String SETTINGS_RESTART = "restart";
+
+    public static final String LOCATION_ERROR = "Unable to get location. Turn on GPS";
+    public static final String LOCATION_LOADING = "Loading location...";
 }

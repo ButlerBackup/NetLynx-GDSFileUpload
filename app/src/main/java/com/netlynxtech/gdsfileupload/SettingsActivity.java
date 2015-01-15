@@ -32,6 +32,13 @@ public class SettingsActivity extends PreferenceActivity {
             }
         });
 
+        findPreference("pref_about").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                startActivity(new Intent(SettingsActivity.this, AboutActivity.class));
+                return true;
+            }
+        });
         findPreference("pref_reregister").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -49,6 +56,7 @@ public class SettingsActivity extends PreferenceActivity {
                         sp.edit().remove(Consts.REGISTER_UDID).commit();
                         sp.edit().remove(Consts.REGISTER_USER_GROUP).commit();
                         sp.edit().remove(Consts.REGISTER_USER_NAME).commit();
+                        sp.edit().clear().commit();
                         Intent data = new Intent();
                         data.setData(Uri.parse(Consts.SETTINGS_RESTART));
                         setResult(RESULT_OK, data);

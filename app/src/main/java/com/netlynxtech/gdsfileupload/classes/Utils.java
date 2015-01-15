@@ -10,10 +10,13 @@ import android.util.Log;
 import com.netlynxtech.gdsfileupload.Consts;
 import com.securepreferences.SecurePreferences;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
 
 /**
  * Created by Probook2 on 30/12/2014.
@@ -67,6 +70,30 @@ public class Utils {
         }
         if (!sp.getString(Consts.REGISTER_UDID, "0").equals("0")) {
             return sp.getString(Consts.REGISTER_UDID, "0");
+        }
+        return "";
+    }
+
+    public String convertVideoToString(File videoFile) {
+        try {
+            BufferedInputStream in = null;
+            in = new BufferedInputStream(new FileInputStream(videoFile));
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            long tamano = videoFile.length();
+            int iTamano = (int) tamano;
+            byte[] b = new byte[iTamano];
+            int bytesRead;
+            while ((bytesRead = in.read(b)) != -1) {
+                bos.write(b, 0, bytesRead);
+            }
+            byte[] bb = bos.toByteArray();
+            try {
+                return Base64.encodeToString(bb, Base64.DEFAULT);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return "";
     }
@@ -169,5 +196,18 @@ public class Utils {
                 e.printStackTrace();
             }
         }
+    }
+
+    public String size(int size){
+        String hrSize = "";
+        double m = size/1024.0;
+        DecimalFormat dec = new DecimalFormat("0.00");
+
+        if (m > 1) {
+            hrSize = dec.format(m).concat(" MB");
+        } else {
+            hrSize = dec.format(size).concat(" KB");
+        }
+        return hrSize;
     }
 }
