@@ -1,9 +1,11 @@
 package com.netlynxtech.gdsfileupload.classes;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 
@@ -198,9 +200,9 @@ public class Utils {
         }
     }
 
-    public String size(int size){
+    public String size(int size) {
         String hrSize = "";
-        double m = size/1024.0;
+        double m = size / 1024.0;
         DecimalFormat dec = new DecimalFormat("0.00");
 
         if (m > 1) {
@@ -209,5 +211,15 @@ public class Utils {
             hrSize = dec.format(size).concat(" KB");
         }
         return hrSize;
+    }
+
+    public boolean compressVideoMMS() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean("pref_video_compress", false);
+    }
+
+    public boolean videoFileSizeLimit() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean("pref_video_size_limit", false);
     }
 }

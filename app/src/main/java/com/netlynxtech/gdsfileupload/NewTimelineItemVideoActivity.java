@@ -27,13 +27,17 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationInfo;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
+import com.netcompss.loader.LoadJNI;
 import com.netlynxtech.gdsfileupload.apiclasses.SubmitMessage;
 import com.netlynxtech.gdsfileupload.classes.SQLFunctions;
 import com.netlynxtech.gdsfileupload.classes.Timeline;
 import com.netlynxtech.gdsfileupload.classes.Utils;
 import com.netlynxtech.gdsfileupload.classes.WebAPIOutput;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
@@ -82,6 +86,22 @@ public class NewTimelineItemVideoActivity extends ActionBarActivity {
             videoFile = new File(new Utils(NewTimelineItemVideoActivity.this).createFolder(), videoFileName);
             isResendingVideo = true;
             loadVideoFile();
+        } else if (getIntent().hasExtra(Consts.VIDEO_CAMERA_PASS_EXTRAS_PURE)) {
+            String currentTime = System.currentTimeMillis() + "";
+            videoFileName = getIntent().getStringExtra(Consts.VIDEO_CAMERA_PASS_EXTRAS_PURE);
+            Uri uriPath = Uri.parse(videoFileName);
+            File tempFile = new File(uriPath.getPath());
+            Log.e("FILENAME", uriPath.getPath());
+            File destination = new File(new Utils(NewTimelineItemVideoActivity.this).createFolder(), currentTime);
+            try {
+                FileUtils.copyFile(tempFile, destination);
+                videoFile = new File(new Utils(NewTimelineItemVideoActivity.this).createFolder(), currentTime);
+                videoFileName = videoFile.getName();
+                loadVideoFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(NewTimelineItemVideoActivity.this, "Failed to copy file to GDSFolder", Toast.LENGTH_SHORT).show();
+            }
         } else {
             finish();
         }
@@ -183,7 +203,7 @@ public class NewTimelineItemVideoActivity extends ActionBarActivity {
             long fileSizeInBytes = videoFile.length();
             long fileSizeInKB = fileSizeInBytes / 1024;
             long fileSizeInMB = fileSizeInKB / 1024;
-            if (fileSizeInMB <= 2) {
+            if (fileSizeInMB <= 99999999) {
                 if (etDescription.getText().toString().length() > 400) {
                     Toast.makeText(NewTimelineItemVideoActivity.this, "Description is more than 400 characters", Toast.LENGTH_LONG).show();
                 } else {
@@ -192,7 +212,7 @@ public class NewTimelineItemVideoActivity extends ActionBarActivity {
                     mTask.execute();
                 }
             } else {
-                Toast.makeText(NewTimelineItemVideoActivity.this, "File is larger than 2 MB", Toast.LENGTH_LONG).show();
+                Toast.makeText(NewTimelineItemVideoActivity.this, "File is larger than 2 MB. Size : " + fileSizeInMB + "mb", Toast.LENGTH_LONG).show();
             }
         } else if (id == android.R.id.home) {
             finish();
@@ -289,6 +309,22 @@ public class NewTimelineItemVideoActivity extends ActionBarActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
+
+                String compressVideoTime = System.currentTimeMillis() + "_compressed.mp4";
+                LoadJNI vk = new LoadJNI();
+                try {
+                    String workFolder = getApplicationContext().getFilesDir().getAbsolutePath();
+                    String[] complexCommand = {"ffmpeg", "-y", "-i", videoFile.getAbsolutePath().toString(), "-strict", "experimental", "-s", "640x480", "-r", "25", "-vcodec", "mpeg4", "-b", "512k", "-ab", "48000", "-ac", "2", "-ar", "22050", "/sdcard/gdsupload/" + compressVideoTime};
+                    // -r = fps
+                    // vcodec = video codec
+                    //ar = audio sample frequency
+                    vk.run(complexCommand, workFolder, getApplicationContext());
+                    Log.i("test", "ffmpeg4android finished successfully");
+                } catch (Throwable e) {
+                    Log.e("test", "vk run exception.", e);
+                }
+                //videoFile.delete();
+                videoFile = new File("/sdcard/gdsupload/" + compressVideoTime);
                 Utils u = new Utils(NewTimelineItemVideoActivity.this);
                 videoString = u.convertVideoToString(videoFile);
                 SubmitMessage m;
@@ -298,9 +334,9 @@ public class NewTimelineItemVideoActivity extends ActionBarActivity {
                     locationName = locationName.replace("null", "").trim();
                 }
                 if (currentLocation != null) {
-                    m = new SubmitMessage(u.getUnique(), etDescription.getText().toString().trim(), videoFile.getName() + ".mp4", videoString, Float.toString(currentLocation.lastLat), Float.toString(currentLocation.lastLong), locationName);
+                    m = new SubmitMessage(u.getUnique(), etDescription.getText().toString().trim(), videoFile.getName(), videoString, Float.toString(currentLocation.lastLat), Float.toString(currentLocation.lastLong), locationName);
                 } else {
-                    m = new SubmitMessage(u.getUnique(), etDescription.getText().toString().trim(), videoFile.getName() + ".mp4", videoString, "", "", locationName);
+                    m = new SubmitMessage(u.getUnique(), etDescription.getText().toString().trim(), videoFile.getName(), videoString, "", "", locationName);
                 }
                 try {
                     res = MainApplication.apiService.uploadContentWithMessage(m);

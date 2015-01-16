@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/GDSFileUpload.iml" filepath="$PROJECT_DIR$/GDSFileUpload.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/library_cropper/library_cropper.iml" filepath="$PROJECT_DIR$/library_cropper/library_cropper.iml" />
+      <module fileurl="file://$PROJECT_DIR$/library_ffmpeg4android/library_ffmpeg4android.iml" filepath="$PROJECT_DIR$/library_ffmpeg4android/library_ffmpeg4android.iml" />
       <module fileurl="file://$PROJECT_DIR$/library_multichoice_abc/library_multichoice_abc.iml" filepath="$PROJECT_DIR$/library_multichoice_abc/library_multichoice_abc.iml" />
       <module fileurl="file://$PROJECT_DIR$/library_multichoice_main/library_multichoice_main.iml" filepath="$PROJECT_DIR$/library_multichoice_main/library_multichoice_main.iml" />
       <module fileurl="file://$PROJECT_DIR$/library_securepreferences/library_securepreferences.iml" filepath="$PROJECT_DIR$/library_securepreferences/library_securepreferences.iml" />

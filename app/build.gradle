@@ -57,4 +57,5 @@ dependencies {
     compile 'commons-io:commons-io:2.4'
     compile 'com.kbeanie:image-chooser-library:1.4.00@aar'
     compile project(':library_multichoice_abc')
+    compile project(':library_ffmpeg4android')
 }

@@ -60,6 +60,7 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.Theme_Smrtgds);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.inject(MainActivity.this);
@@ -96,12 +97,17 @@ public class MainActivity extends ActionBarActivity {
                     adapter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
-                            new MaterialDialog.Builder(MainActivity.this).title("Resend").content("Resend photo?").negativeText("No").positiveText("Yes").callback(new MaterialDialog.ButtonCallback() {
+                            new MaterialDialog.Builder(MainActivity.this).title("Resend").content("Resend item?").negativeText("No").positiveText("Yes").callback(new MaterialDialog.ButtonCallback() {
                                 @Override
                                 public void onPositive(MaterialDialog dialog) {
                                     super.onPositive(dialog);
                                     Timeline item = data.get(i);
-                                    Intent i = new Intent(MainActivity.this, NewTimelineItemPhotoActivity.class);
+                                    Intent i;
+                                    if (!item.getImage().equals("")) {
+                                        i = new Intent(MainActivity.this, NewTimelineItemPhotoActivity.class);
+                                    } else {
+                                        i = new Intent(MainActivity.this, NewTimelineItemVideoActivity.class);
+                                    }
                                     i.putExtra(Consts.TIMELINE_ITEM_SELECTED_FROM_MAINACTIVITY, item);
                                     startActivity(i);
                                 }
@@ -143,6 +149,19 @@ public class MainActivity extends ActionBarActivity {
                                 if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
                                     startActivityForResult(takeVideoIntent, Consts.CAMERA_VIDEO_REQUEST);
                                 }*/
+                                Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+                                if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
+                                    if (new Utils(MainActivity.this).compressVideoMMS()) {
+                                        takeVideoIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0);
+                                    }
+                                    if (new Utils(MainActivity.this).videoFileSizeLimit()) {
+                                        takeVideoIntent.putExtra(MediaStore.EXTRA_SIZE_LIMIT, 2097152L); // 2 mb
+                                    }
+                                    takeVideoIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 15);
+                                    startActivityForResult(takeVideoIntent, Consts.CAMERA_VIDEO_REQUEST);
+                                }
+
+                                /*
                                 videoChooserManager = new VideoChooserManager(MainActivity.this,
                                         ChooserType.REQUEST_CAPTURE_VIDEO, "gdsupload", false);
                                 videoChooserManager.setVideoChooserListener(new VideoChooserListener() {
@@ -165,7 +184,7 @@ public class MainActivity extends ActionBarActivity {
                                     e.printStackTrace();
                                 } catch (Exception e) {
                                     e.printStackTrace();
-                                }
+                                }*/
                                 break;
                             case 2: //pick gallery
                                 if (!new Utils(MainActivity.this).createFolder().equals("")) {
@@ -253,8 +272,6 @@ public class MainActivity extends ActionBarActivity {
             i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
             finish();
-        } else if (requestCode == Consts.CAMERA_VIDEO_REQUEST && resultCode == RESULT_OK) {
-            Uri videoUri = data.getData();
         } else if (requestCode == ChooserType.REQUEST_PICK_PICTURE && resultCode == RESULT_OK) {
             if (imageChooserManager == null) {
                 reinitializeImageChooser();
@@ -270,6 +287,13 @@ public class MainActivity extends ActionBarActivity {
                 reinitializeVideoChooser();
             }
             videoChooserManager.submit(requestCode, data);
+        } else if (requestCode == Consts.CAMERA_VIDEO_REQUEST && resultCode == RESULT_OK) {
+            Uri _uri = data.getData();
+            Cursor cursor = getContentResolver().query(_uri, new String[]{MediaStore.Images.Media.DATA}, null, null, null);
+            cursor.moveToFirst();
+            final String videoFilePath = cursor.getString(0);
+            cursor.close();
+            startActivity(new Intent(MainActivity.this, NewTimelineItemVideoActivity.class).putExtra(Consts.VIDEO_CAMERA_PASS_EXTRAS_PURE, videoFilePath.toString()));
         }
     }
 

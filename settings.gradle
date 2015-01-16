@@ -1,3 +1,4 @@
 include ':app', ':library_cropper', ':library_multichoice_main', ':library_multichoice_abc'
 include ':library_securepreferences'
 include ':library_timeago'
+include ':library_ffmpeg4android'

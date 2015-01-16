@@ -18,7 +18,7 @@ public class Consts {
 
     public static final String VIDEO_GALLERY_PASS_EXTRAS = "galleryFileName";
     public static final String VIDEO_CAMERA_PASS_EXTRAS = "cameraFileName";
-
+    public static final String VIDEO_CAMERA_PASS_EXTRAS_PURE = "cameraFileNamePure";
 
     public static final String TIMELINE_ITEM_SELECTED_FROM_MAINACTIVITY = "timelineItem";
     public static final String WEB_API_URL = "http://www.cloudmessage.me/svcFileUploadWebTier/svcFileUpload.svc";

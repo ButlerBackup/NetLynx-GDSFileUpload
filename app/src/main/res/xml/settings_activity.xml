@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="Misc">
+       <!-- <CheckBoxPreference
+            android:key="pref_video_compress"
+            android:defaultValue="true"
+            android:title="Compress Video" />
+        <CheckBoxPreference
+            android:key="pref_video_size_limit"
+            android:defaultValue="true"
+            android:title="Limit Video to 2MB" />-->
         <Preference
             android:key="pref_messages_clear"
             android:title="Clear All Messages" />

@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="debug"><source path="C:\Users\Probook2\Desktop\GDSFileUpload\library_ffmpeg4android\build\intermediates\bundles\debug\assets"><file name="in.mp4" path="C:\Users\Probook2\Desktop\GDSFileUpload\library_ffmpeg4android\build\intermediates\bundles\debug\assets\in.mp4"/></source></dataSet><dataSet config="main"><source path="C:\Users\Probook2\Desktop\GDSFileUpload\library_ffmpeg4android\src\androidTest\assets"/></dataSet></merger>

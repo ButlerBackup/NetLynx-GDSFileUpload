@@ -105,6 +105,7 @@
     <orderEntry type="library" exported="" name="image-chooser-library-1.4.00" level="project" />
     <orderEntry type="module" module-name="library_multichoice_abc" exported="" />
     <orderEntry type="module" module-name="library_timeago" exported="" />
+    <orderEntry type="module" module-name="library_ffmpeg4android" exported="" />
     <orderEntry type="module" module-name="library_securepreferences" exported="" />
   </component>
 </module>

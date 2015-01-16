@@ -7,20 +7,24 @@ The following files were *not* copied into the new Gradle project; you
 should evaluate whether these are still needed in your project and if
 so manually move them:
 
-* .gitignore
-* LICENSE
-* README.md
-* build.xml
-* proguard-project.txt
+* commands.txt
+* readme.txt
+* release_notes.txt
 
 Moved Files:
 ------------
 Android Gradle projects use a different directory structure than ADT
 Eclipse projects. Here's how the projects were restructured:
 
-* AndroidManifest.xml => library_timeago\src\main\AndroidManifest.xml
-* res\ => library_timeago\src\main\res\
-* src\ => library_timeago\src\main\java\
+* AndroidManifest.xml => library_ffmpeg4android\src\main\AndroidManifest.xml
+* assets\ => library_ffmpeg4android\src\main\assets\
+* libs\armeabi-v7a\liblicense-jni.so => library_ffmpeg4android\src\main\jniLibs\armeabi-v7a\liblicense-jni.so
+* libs\armeabi-v7a\libloader-jni.so => library_ffmpeg4android\src\main\jniLibs\armeabi-v7a\libloader-jni.so
+* libs\armeabi-v7a\libvideokit.so => library_ffmpeg4android\src\main\jniLibs\armeabi-v7a\libvideokit.so
+* libs\armeabi-v7a\libvideokit.so.small => library_ffmpeg4android\src\main\jniLibs\armeabi-v7a\libvideokit.so.small
+* lint.xml => library_ffmpeg4android\lint.xml
+* res\ => library_ffmpeg4android\src\main\res\
+* src\ => library_ffmpeg4android\src\main\java\
 
 Next Steps:
 -----------
