@@ -4,11 +4,11 @@
 
     <application
         android:name=".MainApplication"
+        android:configChanges="orientation|screenSize"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/Theme.Smrtgds">
+        android:theme="@style/Theme.MyTheme">
         <activity
-            android:theme="@style/Theme.Smrtgds"
             android:name=".RegisterActivity"
             android:label="@string/app_name">
             <intent-filter>
@@ -53,6 +53,10 @@
         <meta-data
             android:name="com.crashlytics.ApiKey"
             android:value="c3d209b76117254253c9ff1ad725518e538ea6e3" />
+
+        <service android:name=".service.UploadVideoService" />
+        <service android:name=".service.MediaScannerService" />
+        <service android:name=".service.UploadPhotoService" />
     </application>
 
     <uses-permission android:name="android.permission.CAMERA" />

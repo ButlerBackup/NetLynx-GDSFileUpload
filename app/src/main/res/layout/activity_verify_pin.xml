@@ -17,7 +17,8 @@
         android:layout_marginTop="10dp"
         android:src="@drawable/smrt_logo" />
 
-    <TextView
+    <com.netlynxtech.gdsfileupload.classes.TextViewPlus
+        android:textColor="#000"
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -63,6 +64,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:text="Verify PIN"
+        android:textColor="#000"
         app:buttonColor="@color/fbutton_default_color"
         app:cornerRadius="0dp"
         app:shadowColor="@color/fbutton_default_shadow_color"

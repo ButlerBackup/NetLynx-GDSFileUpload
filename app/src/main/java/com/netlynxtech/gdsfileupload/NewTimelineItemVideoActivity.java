@@ -33,6 +33,7 @@ import com.netlynxtech.gdsfileupload.classes.SQLFunctions;
 import com.netlynxtech.gdsfileupload.classes.Timeline;
 import com.netlynxtech.gdsfileupload.classes.Utils;
 import com.netlynxtech.gdsfileupload.classes.WebAPIOutput;
+import com.netlynxtech.gdsfileupload.service.UploadVideoService;
 
 import org.apache.commons.io.FileUtils;
 
@@ -207,9 +208,25 @@ public class NewTimelineItemVideoActivity extends ActionBarActivity {
                 if (etDescription.getText().toString().length() > 400) {
                     Toast.makeText(NewTimelineItemVideoActivity.this, "Description is more than 400 characters", Toast.LENGTH_LONG).show();
                 } else {
-                    mTask = null;
-                    mTask = new uploadVideo();
-                    mTask.execute();
+                    Intent i = new Intent(NewTimelineItemVideoActivity.this, UploadVideoService.class);
+                    if (etDescription.getText().toString() != null && etDescription.getText().toString().trim().length() > 0) {
+                        i.putExtra("message", etDescription.getText().toString().trim());
+                    } else {
+                        i.putExtra("message", "");
+                    }
+                    i.putExtra("locationName", locationName);
+                    if (currentLocation != null) {
+                        i.putExtra("locationLat", Float.toString(currentLocation.lastLat));
+                        i.putExtra("locationLong", Float.toString(currentLocation.lastLong));
+                    } else {
+                        i.putExtra("locationLat", "");
+                        i.putExtra("locationLong", "");
+                    }
+                    i.putExtra("file", videoFile.getAbsoluteFile().toString());
+                    Toast.makeText(NewTimelineItemVideoActivity.this, "Video will be processed in the background. You will be notified of any changes", Toast.LENGTH_LONG).show();
+                    startService(i);
+                    finish();
+                    //new uploadVideo().execute();
                 }
             } else {
                 Toast.makeText(NewTimelineItemVideoActivity.this, "File is larger than 2 MB. Size : " + fileSizeInMB + "mb", Toast.LENGTH_LONG).show();

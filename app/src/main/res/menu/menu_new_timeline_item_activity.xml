@@ -3,6 +3,7 @@
     <item
         android:id="@+id/mUpload"
         android:enabled="true"
+        android:icon="@drawable/ic_action_upload"
         android:title="Upload"
         app:showAsAction="always"></item>
 

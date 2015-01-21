@@ -113,6 +113,8 @@ public class TimelineAdapter extends MultiChoiceBaseAdapter {
         TextView tvMessage;
         @InjectView(R.id.ivTimelineImage)
         ImageView ivTimelineImage;
+        @InjectView(R.id.ivIsVideo)
+        ImageView ivIsVideo;
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);
@@ -144,6 +146,7 @@ public class TimelineAdapter extends MultiChoiceBaseAdapter {
         File image;
         if (!t.getImage().equals("")) {
             image = new File(new Utils(context).createThumbnailFolder(), t.getImage() + "_thumbnail");
+            holder.ivIsVideo.setVisibility(View.GONE);
         } else {
             image = new File(new Utils(context).createThumbnailFolder(), t.getVideo() + "_thumbnail");
         }

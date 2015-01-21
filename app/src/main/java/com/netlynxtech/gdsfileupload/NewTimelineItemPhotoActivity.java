@@ -31,6 +31,8 @@ import com.netlynxtech.gdsfileupload.classes.SQLFunctions;
 import com.netlynxtech.gdsfileupload.classes.Timeline;
 import com.netlynxtech.gdsfileupload.classes.Utils;
 import com.netlynxtech.gdsfileupload.classes.WebAPIOutput;
+import com.netlynxtech.gdsfileupload.service.MediaScannerService;
+import com.netlynxtech.gdsfileupload.service.UploadPhotoService;
 
 import org.apache.commons.io.FileUtils;
 
@@ -194,9 +196,27 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
             if (etDescription.getText().toString().length() > 400) {
                 Toast.makeText(NewTimelineItemPhotoActivity.this, "Description is more than 400 characters", Toast.LENGTH_LONG).show();
             } else {
-                mTask = null;
+                Intent i = new Intent(NewTimelineItemPhotoActivity.this, UploadPhotoService.class);
+                if (etDescription.getText().toString() != null && etDescription.getText().toString().trim().length() > 0) {
+                    i.putExtra("message", etDescription.getText().toString().trim());
+                } else {
+                    i.putExtra("message", "");
+                }
+                i.putExtra("locationName", locationName);
+                if (currentLocation != null) {
+                    i.putExtra("locationLat", Float.toString(currentLocation.lastLat));
+                    i.putExtra("locationLong", Float.toString(currentLocation.lastLong));
+                } else {
+                    i.putExtra("locationLat", "");
+                    i.putExtra("locationLong", "");
+                }
+                i.putExtra("file", imgFile.getAbsoluteFile().toString());
+                Toast.makeText(NewTimelineItemPhotoActivity.this, "Photo will be processed in the background. You will be notified of any changes", Toast.LENGTH_LONG).show();
+                startService(i);
+                finish();
+                /*mTask = null;
                 mTask = new uploadImage();
-                mTask.execute();
+                mTask.execute();*/
             }
         } else if (id == android.R.id.home) {
             finish();
@@ -282,6 +302,7 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
                             Log.e("Result", "There were no response from server");
                             Toast.makeText(NewTimelineItemPhotoActivity.this, "There were no response from server", Toast.LENGTH_LONG).show();
                         }
+                        startService(new Intent(NewTimelineItemPhotoActivity.this, MediaScannerService.class).putExtra("file", imgFile.getAbsoluteFile().toString()).putExtra("image", true));
                     } catch (Exception e) {
                         e.printStackTrace();
                         //Toast.makeText(NewTimelineItemPhotoActivity.this, e.getMessage().toString(), Toast.LENGTH_LONG).show();

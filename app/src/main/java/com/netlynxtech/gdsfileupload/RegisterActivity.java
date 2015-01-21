@@ -82,11 +82,11 @@ public class RegisterActivity extends ActionBarActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                /*if (gcm == null) {
+                if (gcm == null) {
                     gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
                 }
-                regid = gcm.register(PROJECT_NUMBER);*/
-                regid = "11111111";
+                regid = gcm.register(PROJECT_NUMBER);
+                // regid = "11111111";
                 Log.e("GCM", regid);
                 // RegisterUser user = new RegisterUser(etPhoneNumber.getText().toString(), etLoginId.getText().toString(), etPassword.getText().toString(), new Utils(RegisterActivity.this).getUnique());
                 if (regid != null && regid.length() > 0) {

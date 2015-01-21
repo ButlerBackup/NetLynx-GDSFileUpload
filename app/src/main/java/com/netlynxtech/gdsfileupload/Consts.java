@@ -34,4 +34,8 @@ public class Consts {
 
     public static final String LOCATION_ERROR = "Unable to get location. Turn on GPS";
     public static final String LOCATION_LOADING = "Loading location...";
+
+    
+    public static final int SERVICE_VIDEO_UPLOAD = 1337;
+    public static final int SERVICE_PHOTO_UPLOAD = 1338;
 }

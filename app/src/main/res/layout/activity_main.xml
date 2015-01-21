@@ -1,5 +1,6 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fab="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ptr_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -8,8 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:animationCache="false"
-        android:divider="@null"
-        android:dividerHeight="0dp"
         android:fastScrollEnabled="true"
         android:scrollingCache="false"
         android:smoothScrollbar="true" />
@@ -24,4 +23,4 @@
         fab:fab_colorNormal="@color/primary"
         fab:fab_colorPressed="@color/primary_pressed"
         fab:fab_colorRipple="@color/ripple" />
-</FrameLayout>
+</uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout>

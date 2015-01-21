@@ -35,6 +35,9 @@ import java.util.ArrayList;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -52,6 +55,9 @@ public class MainActivity extends ActionBarActivity {
     ImageChooserManager imageChooserManager;
     VideoChooserManager videoChooserManager;
 
+    @InjectView(R.id.ptr_layout)
+    PullToRefreshLayout mPullToRefreshLayout;
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -60,10 +66,20 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.Theme_Smrtgds);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.inject(MainActivity.this);
+        // Now setup the PullToRefreshLayout
+        ActionBarPullToRefresh.from(this)
+                // Mark All Children as pullable
+                .allChildrenArePullable()
+                        // Set a OnRefreshListener
+                .listener(new OnRefreshListener() {
+                    @Override
+                    public void onRefreshStarted(View view) {
+                        new loadTimeline().execute();
+                    }
+                }).setup(mPullToRefreshLayout);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -80,6 +96,7 @@ public class MainActivity extends ActionBarActivity {
         protected Void doInBackground(Void... voids) {
             SQLFunctions sql = new SQLFunctions(MainActivity.this);
             sql.open();
+            data.clear();
             data = sql.loadTimelineItems();
             sql.close();
             return null;
@@ -91,6 +108,12 @@ public class MainActivity extends ActionBarActivity {
             MainActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    try {
+                        mPullToRefreshLayout.setRefreshComplete();
+                        Log.e("DONE", "ONREFRESHCOMPLETE");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     adapter = new TimelineAdapter(saveInstanceState, MainActivity.this, data);
                     lvTimeline.setAdapter(adapter);
                     adapter.setAdapterView(lvTimeline);
@@ -288,12 +311,17 @@ public class MainActivity extends ActionBarActivity {
             }
             videoChooserManager.submit(requestCode, data);
         } else if (requestCode == Consts.CAMERA_VIDEO_REQUEST && resultCode == RESULT_OK) {
-            Uri _uri = data.getData();
-            Cursor cursor = getContentResolver().query(_uri, new String[]{MediaStore.Images.Media.DATA}, null, null, null);
-            cursor.moveToFirst();
-            final String videoFilePath = cursor.getString(0);
-            cursor.close();
-            startActivity(new Intent(MainActivity.this, NewTimelineItemVideoActivity.class).putExtra(Consts.VIDEO_CAMERA_PASS_EXTRAS_PURE, videoFilePath.toString()));
+            try {
+                Uri _uri = data.getData();
+                Cursor cursor = getContentResolver().query(_uri, new String[]{MediaStore.Images.Media.DATA}, null, null, null);
+                cursor.moveToFirst();
+                final String videoFilePath = cursor.getString(0);
+                cursor.close();
+                startActivity(new Intent(MainActivity.this, NewTimelineItemVideoActivity.class).putExtra(Consts.VIDEO_CAMERA_PASS_EXTRAS_PURE, videoFilePath.toString()));
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(MainActivity.this, "Unable to retreive captured video. Please select video from gallery", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
