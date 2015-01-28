@@ -158,7 +158,7 @@ public class MainActivity extends ActionBarActivity {
                             case 0: // take photo
                                 Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                 if (!new Utils(MainActivity.this).createFolder().equals("")) {
-                                    pictureDirectory = System.currentTimeMillis() + "";
+                                    pictureDirectory = System.currentTimeMillis() + ".jpg";
                                     File output = new File(new Utils(MainActivity.this).createFolder(), pictureDirectory);
                                     i.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(output));
                                     startActivityForResult(i, Consts.CAMERA_PHOTO_REQUEST);
@@ -167,11 +167,7 @@ public class MainActivity extends ActionBarActivity {
                                 }
                                 break;
 
-                            case 1: //take video
-                                /*Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-                                if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
-                                    startActivityForResult(takeVideoIntent, Consts.CAMERA_VIDEO_REQUEST);
-                                }*/
+                            case 1:
                                 Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
                                 if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
                                     if (new Utils(MainActivity.this).compressVideoMMS()) {
@@ -183,31 +179,6 @@ public class MainActivity extends ActionBarActivity {
                                     takeVideoIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 15);
                                     startActivityForResult(takeVideoIntent, Consts.CAMERA_VIDEO_REQUEST);
                                 }
-
-                                /*
-                                videoChooserManager = new VideoChooserManager(MainActivity.this,
-                                        ChooserType.REQUEST_CAPTURE_VIDEO, "gdsupload", false);
-                                videoChooserManager.setVideoChooserListener(new VideoChooserListener() {
-                                    @Override
-                                    public void onVideoChosen(ChosenVideo chosenVideo) {
-                                        if (chosenVideo != null) {
-                                            Log.e("Chosen VIDEO", chosenVideo.getVideoFilePath());
-                                            startActivity(new Intent(MainActivity.this, NewTimelineItemVideoActivity.class).putExtra(Consts.VIDEO_CAMERA_PASS_EXTRAS, chosenVideo.getVideoFilePath()));
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onError(String s) {
-                                        Log.e("ERROR", s);
-                                    }
-                                });
-                                try {
-                                    filePath = videoChooserManager.choose();
-                                } catch (IllegalArgumentException e) {
-                                    e.printStackTrace();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }*/
                                 break;
                             case 2: //pick gallery
                                 if (!new Utils(MainActivity.this).createFolder().equals("")) {
@@ -282,14 +253,6 @@ public class MainActivity extends ActionBarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Consts.CAMERA_PHOTO_REQUEST && resultCode == RESULT_OK) {
             startActivity(new Intent(MainActivity.this, NewTimelineItemPhotoActivity.class).putExtra(Consts.IMAGE_CAMERA_PASS_EXTRAS, pictureDirectory));
-        } else if (requestCode == Consts.CAMERA_PICK_IMAGE_FROM_GALLERY && resultCode == RESULT_OK) {
-            Uri _uri = data.getData();
-            Cursor cursor = getContentResolver().query(_uri, new String[]{android.provider.MediaStore.Images.ImageColumns.DATA}, null, null, null);
-            cursor.moveToFirst();
-            final String imageFilePath = cursor.getString(0);
-            cursor.close();
-            Toast.makeText(MainActivity.this, imageFilePath.toString(), Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(MainActivity.this, NewTimelineItemPhotoActivity.class).putExtra(Consts.IMAGE_GALLERY_PASS_EXTRAS, imageFilePath));
         } else if (requestCode == Consts.SETTING_RESTART_CODE && resultCode == RESULT_OK) {
             Intent i = new Intent(MainActivity.this, RegisterActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -300,11 +263,6 @@ public class MainActivity extends ActionBarActivity {
                 reinitializeImageChooser();
             }
             imageChooserManager.submit(requestCode, data);
-        } else if (requestCode == ChooserType.REQUEST_CAPTURE_VIDEO && resultCode == RESULT_OK) {
-            if (videoChooserManager == null) {
-                reinitializeVideoChooser();
-            }
-            videoChooserManager.submit(requestCode, data);
         } else if (requestCode == ChooserType.REQUEST_PICK_VIDEO && resultCode == RESULT_OK) {
             if (videoChooserManager == null) {
                 reinitializeVideoChooser();

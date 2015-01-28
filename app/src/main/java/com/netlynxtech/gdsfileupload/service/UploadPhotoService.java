@@ -1,6 +1,5 @@
 package com.netlynxtech.gdsfileupload.service;
 
-import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -8,12 +7,12 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
-import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.commonsware.cwac.wakeful.WakefulIntentService;
 import com.netlynxtech.gdsfileupload.Consts;
 import com.netlynxtech.gdsfileupload.MainApplication;
 import com.netlynxtech.gdsfileupload.R;
@@ -24,11 +23,11 @@ import com.netlynxtech.gdsfileupload.classes.Utils;
 import com.netlynxtech.gdsfileupload.classes.WebAPIOutput;
 
 import java.io.File;
+import java.util.Random;
 
-public class UploadPhotoService extends IntentService {
+public class UploadPhotoService extends WakefulIntentService {
     File photoFile;
     String message, locationName, locationLat, locationLong;
-    uploadPhoto mTask;
     NotificationCompat.Builder mBuilder;
 
     public UploadPhotoService() {
@@ -36,7 +35,14 @@ public class UploadPhotoService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void doWakefulWork(Intent intent) {
+        WebAPIOutput res = null;
+        Utils u;
+        Bitmap thumbnail = null;
+        int id = new Random().nextInt(1000);
+        if (id < 1) {
+            id = 1;
+        }
         if (!intent.hasExtra("file")) {
             Log.e("Intent", "no file");
         }
@@ -53,19 +59,75 @@ public class UploadPhotoService extends IntentService {
             Log.e("Intent", "no locationLong");
         }
 
-
         if (intent.hasExtra("file") && intent.hasExtra("message") && intent.hasExtra("locationName") && intent.hasExtra("locationLat") && intent.hasExtra("locationLong")) {
             photoFile = new File(intent.getStringExtra("file"));
             message = intent.getStringExtra("message");
             locationName = intent.getStringExtra("locationName");
             locationLat = intent.getStringExtra("locationLat");
             locationLong = intent.getStringExtra("locationLong");
-            //Toast.makeText(uploadPhotoService.this, "Video will be processed in the background. You will be notified of any changes", Toast.LENGTH_LONG).show();
-            showNotification(Consts.SERVICE_PHOTO_UPLOAD, "Uploading photo", message, true);
-           /* mTask = null;
-            mTask = new uploadPhoto();
-            mTask.execute();*/
-            sleeper.run();
+            showNotification(id, "Uploading photo", message, true, null);
+            try {
+                u = new Utils(UploadPhotoService.this);
+                updateNotification(id, "Compressing Photo");
+                String bitmapString = u.convertBitmapToString(Utils.decodeSampledBitmapFromResource(photoFile));
+                Log.e("uploadPhotoService", "Compressing photo");
+                Log.e("uploadPhotoService", "Done compressing photo. Now uploading");
+                //photoFile.delete();
+                updateNotification(id, "Uploading Photo");
+                if (locationName.equals(Consts.LOCATION_ERROR) || locationName.equals(Consts.LOCATION_LOADING)) {
+                    locationName = "";
+                } else {
+                    locationName = locationName.replace("null", "").trim();
+                }
+                SubmitMessage m = new SubmitMessage(u.getUnique(), message, photoFile.getName(), bitmapString, locationLat, locationLong, locationName);
+                res = MainApplication.apiService.uploadContentWithMessage(m);
+                if (res != null) {
+                    Log.e("uploadPhotoService", "Creating thumbnail");
+                    updateNotification(id, "Creating Photo Thumbnail");
+                    thumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(photoFile.getAbsolutePath().toString()), 180, 180);
+                    new Utils(UploadPhotoService.this).saveImageToFolder(thumbnail, photoFile.getName().toString() + "_thumbnail");
+                }
+            } catch (Exception e) {
+                Log.e("ServiceDemo", "Service was interrupted.", e);
+                e.printStackTrace();
+            }
+            try {
+                new Utils(UploadPhotoService.this).cancelNotification(id);
+                if (res != null) {
+                    if (res.getStatusCode() == 1) {
+                        SQLFunctions sql = new SQLFunctions(UploadPhotoService.this);
+                        sql.open();
+                        Timeline t = new Timeline();
+                        t.setUnixTime((System.currentTimeMillis() / 1000L) + "");
+                        t.setMessage(message);
+                        t.setImage(photoFile.getName().toString());
+                        t.setVideo("");
+                        t.setLocation(locationName);
+                        t.setLocationLat(locationLat);
+                        t.setLocationLong(locationLong);
+                        sql.insertTimelineItem(t);
+                        sql.close();
+                        showNotification(id, "Photo uploaded!", message, false, thumbnail);
+                        Intent i = new Intent(UploadPhotoService.this, MediaScannerService.class);
+                        i.putExtra("file", photoFile.getAbsoluteFile().toString());
+                        i.putExtra("image", true);
+                        WakefulIntentService.sendWakefulWork(UploadPhotoService.this, i);
+                        stopSelf();
+                        // show notification
+                    } else {
+                        showNotification(id, res.getStatusDescription(), res.getStatusDescription(), false, null);
+                        stopSelf();
+                    }
+                } else {
+                    Log.e("Result", "There were no response from server");
+                    showNotification(id, "There were no response from server", "There were no response from server", false, null);
+                    stopSelf();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                showNotification(id, e.getMessage().toString(), e.getMessage().toString(), false, null);
+                stopSelf();
+            }
         } else {
             Log.e("SERVICE", "NO PARAMETER");
             stopSelf();
@@ -77,88 +139,7 @@ public class UploadPhotoService extends IntentService {
         return null;
     }
 
-
-    private class uploadPhoto extends AsyncTask<Void, Void, Void> {
-        WebAPIOutput res;
-        Utils u;
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            try {
-                new Utils(UploadPhotoService.this).cancelNotification(Consts.SERVICE_PHOTO_UPLOAD);
-                if (res != null) {
-                    if (res.getStatusCode() == 1) {
-                        SQLFunctions sql = new SQLFunctions(UploadPhotoService.this);
-                        sql.open();
-                        Timeline t = new Timeline();
-                        t.setUnixTime((System.currentTimeMillis() / 1000L) + "");
-                        t.setMessage(message);
-                        t.setImage(photoFile.getName().toString());
-                        t.setVideo("");
-                        t.setLocation(locationName);
-                        t.setLocationLat(locationLat);
-                        t.setLocationLong(locationLong);
-                        sql.insertTimelineItem(t);
-                        sql.close();
-                        showNotification(0, "Photo uploaded!", message, false);
-                        startService(new Intent(UploadPhotoService.this, MediaScannerService.class).putExtra("file", photoFile.getAbsoluteFile().toString()).putExtra("image", true));
-                        stopSelf();
-                        // show notification
-                    } else {
-                        showNotification(0, res.getStatusDescription(), res.getStatusDescription(), false);
-                        Toast.makeText(UploadPhotoService.this, res.getStatusDescription(), Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Log.e("Result", "There were no response from server");
-                    Toast.makeText(UploadPhotoService.this, "There were no response from server", Toast.LENGTH_LONG).show();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(UploadPhotoService.this, e.getMessage().toString(), Toast.LENGTH_LONG).show();
-            }
-
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            u = new Utils(UploadPhotoService.this);
-            try {
-                updateNotification(Consts.SERVICE_PHOTO_UPLOAD, "Compressing Photo");
-                String bitmapString = u.convertBitmapToString(Utils.decodeSampledBitmapFromResource(photoFile));
-                Log.e("uploadPhotoService", "Compressing photo");
-                Log.e("uploadPhotoService", "Done compressing photo. Now uploading");
-                //photoFile.delete();
-                updateNotification(Consts.SERVICE_PHOTO_UPLOAD, "Uploading Video");
-                Utils u = new Utils(UploadPhotoService.this);
-                SubmitMessage m;
-                if (locationName.equals(Consts.LOCATION_ERROR) || locationName.equals(Consts.LOCATION_LOADING)) {
-                    locationName = "";
-                } else {
-                    locationName = locationName.replace("null", "").trim();
-                }
-                m = new SubmitMessage(u.getUnique(), message, photoFile.getName(), bitmapString, locationLat, locationLong, locationName);
-
-                try {
-                    res = MainApplication.apiService.uploadContentWithMessage(m);
-                    if (res != null) {
-                        Log.e("uploadPhotoService", "Creating thumbnail");
-                        updateNotification(Consts.SERVICE_PHOTO_UPLOAD, "Creating Photo Thumbnail");
-                        Bitmap thumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(photoFile.getAbsolutePath().toString()), 180, 180);
-                        new Utils(UploadPhotoService.this).saveImageToFolder(thumbnail, photoFile.getName().toString() + "_thumbnail");
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(UploadPhotoService.this, e.getMessage().toString(), Toast.LENGTH_LONG).show();
-            }
-            return null;
-        }
-    }
-
-    public void showNotification(int id, String title, String content, boolean autoCancel) {
+    public void showNotification(int id, String title, String content, boolean autoCancel, Bitmap bitmap) {
         final Intent emptyIntent = new Intent();
         PendingIntent pendingIntent = PendingIntent.getActivity(UploadPhotoService.this, 0, emptyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         mBuilder = new NotificationCompat.Builder(UploadPhotoService.this)
@@ -168,6 +149,9 @@ public class UploadPhotoService extends IntentService {
                 .setContentText(content)
                 .setOngoing(autoCancel)
                 .setContentIntent(pendingIntent); //Required on Gingerbread and below
+        if (bitmap != null) {
+            mBuilder.setLargeIcon(bitmap);
+        }
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(id, mBuilder.build());
     }
@@ -177,82 +161,4 @@ public class UploadPhotoService extends IntentService {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(id, mBuilder.build());
     }
-
-    Runnable sleeper = new Runnable() {
-        WebAPIOutput res;
-        Utils u;
-
-        @Override
-        public void run() {
-            try {
-                u = new Utils(UploadPhotoService.this);
-                try {
-                    updateNotification(Consts.SERVICE_PHOTO_UPLOAD, "Compressing Photo");
-                    String bitmapString = u.convertBitmapToString(Utils.decodeSampledBitmapFromResource(photoFile));
-                    Log.e("uploadPhotoService", "Compressing photo");
-                    Log.e("uploadPhotoService", "Done compressing photo. Now uploading");
-                    //photoFile.delete();
-                    updateNotification(Consts.SERVICE_PHOTO_UPLOAD, "Uploading Video");
-                    Utils u = new Utils(UploadPhotoService.this);
-                    SubmitMessage m;
-                    if (locationName.equals(Consts.LOCATION_ERROR) || locationName.equals(Consts.LOCATION_LOADING)) {
-                        locationName = "";
-                    } else {
-                        locationName = locationName.replace("null", "").trim();
-                    }
-                    m = new SubmitMessage(u.getUnique(), message, photoFile.getName(), bitmapString, locationLat, locationLong, locationName);
-
-                    try {
-                        res = MainApplication.apiService.uploadContentWithMessage(m);
-                        if (res != null) {
-                            Log.e("uploadPhotoService", "Creating thumbnail");
-                            updateNotification(Consts.SERVICE_PHOTO_UPLOAD, "Creating Photo Thumbnail");
-                            Bitmap thumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(photoFile.getAbsolutePath().toString()), 180, 180);
-                            new Utils(UploadPhotoService.this).saveImageToFolder(thumbnail, photoFile.getName().toString() + "_thumbnail");
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(UploadPhotoService.this, e.getMessage().toString(), Toast.LENGTH_LONG).show();
-                }
-            } catch (Exception e) {
-                Log.e("ServiceDemo", "Service was interrupted.", e);
-                e.printStackTrace();
-            }
-            try {
-                new Utils(UploadPhotoService.this).cancelNotification(Consts.SERVICE_PHOTO_UPLOAD);
-                if (res != null) {
-                    if (res.getStatusCode() == 1) {
-                        SQLFunctions sql = new SQLFunctions(UploadPhotoService.this);
-                        sql.open();
-                        Timeline t = new Timeline();
-                        t.setUnixTime((System.currentTimeMillis() / 1000L) + "");
-                        t.setMessage(message);
-                        t.setImage(photoFile.getName().toString());
-                        t.setVideo("");
-                        t.setLocation(locationName);
-                        t.setLocationLat(locationLat);
-                        t.setLocationLong(locationLong);
-                        sql.insertTimelineItem(t);
-                        sql.close();
-                        showNotification(0, "Photo uploaded!", message, false);
-                        startService(new Intent(UploadPhotoService.this, MediaScannerService.class).putExtra("file", photoFile.getAbsoluteFile().toString()).putExtra("image", true));
-                        stopSelf();
-                        // show notification
-                    } else {
-                        showNotification(0, res.getStatusDescription(), res.getStatusDescription(), false);
-                        Toast.makeText(UploadPhotoService.this, res.getStatusDescription(), Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Log.e("Result", "There were no response from server");
-                    Toast.makeText(UploadPhotoService.this, "There were no response from server", Toast.LENGTH_LONG).show();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(UploadPhotoService.this, e.getMessage().toString(), Toast.LENGTH_LONG).show();
-            }
-        }
-    };
 }

@@ -24,6 +24,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.commonsware.cwac.wakeful.WakefulIntentService;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationInfo;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
@@ -224,7 +225,8 @@ public class NewTimelineItemVideoActivity extends ActionBarActivity {
                     }
                     i.putExtra("file", videoFile.getAbsoluteFile().toString());
                     Toast.makeText(NewTimelineItemVideoActivity.this, "Video will be processed in the background. You will be notified of any changes", Toast.LENGTH_LONG).show();
-                    startService(i);
+                    //startService(i);
+                    WakefulIntentService.sendWakefulWork(NewTimelineItemVideoActivity.this, i);
                     finish();
                     //new uploadVideo().execute();
                 }

@@ -5,10 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,16 +20,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.MaterialDialog;
+import com.commonsware.cwac.wakeful.WakefulIntentService;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationInfo;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
-import com.netlynxtech.gdsfileupload.apiclasses.SubmitMessage;
-import com.netlynxtech.gdsfileupload.classes.SQLFunctions;
 import com.netlynxtech.gdsfileupload.classes.Timeline;
 import com.netlynxtech.gdsfileupload.classes.Utils;
-import com.netlynxtech.gdsfileupload.classes.WebAPIOutput;
-import com.netlynxtech.gdsfileupload.service.MediaScannerService;
 import com.netlynxtech.gdsfileupload.service.UploadPhotoService;
 
 import org.apache.commons.io.FileUtils;
@@ -66,7 +60,6 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
     boolean isResendingPhoto = false;
     String locationName = "";
     Timeline timelineResent;
-    uploadImage mTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,11 +78,13 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
             pictureFileName = getIntent().getStringExtra(Consts.IMAGE_GALLERY_PASS_EXTRAS);
             Uri uriPath = Uri.parse(pictureFileName);
             File tempFile = new File(uriPath.getPath());
+           // Toast.makeText(NewTimelineItemPhotoActivity.this, tempFile.getAbsolutePath().toString(), Toast.LENGTH_LONG).show();
             Log.e("FILENAME", uriPath.getPath());
-            File destination = new File(new Utils(NewTimelineItemPhotoActivity.this).createFolder(), currentTime);
+            File destination = new File(new Utils(NewTimelineItemPhotoActivity.this).createFolder(), currentTime + ".jpg");
             try {
                 FileUtils.copyFile(tempFile, destination);
-                imgFile = new File(new Utils(NewTimelineItemPhotoActivity.this).createFolder(), currentTime);
+                imgFile = new File(new Utils(NewTimelineItemPhotoActivity.this).createFolder(), currentTime + ".jpg");
+                tempFile.delete();
                 loadImageFile();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -134,10 +129,12 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
         if (imgFile.exists()) {
             Log.e("File Size", imgFile.length() + "");
             Log.e("File Directory", imgFile.getAbsolutePath().toString());
+           // Toast.makeText(NewTimelineItemPhotoActivity.this, imgFile.getAbsolutePath().toString() + "\n" + imgFile.getName().toString(), Toast.LENGTH_LONG).show();
             croppedImage = Utils.decodeSampledBitmapFromResource(imgFile);
             ivNewTimelineImage.setImageBitmap(croppedImage);
         } else {
             Toast.makeText(NewTimelineItemPhotoActivity.this, "No image found", Toast.LENGTH_LONG).show();
+            finish();
         }
     }
 
@@ -175,7 +172,6 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
                 Log.e("UPDATE", "Latest location has been broadcast");
                 new getLocationPlaceName().execute();
             } else {
-
                 // tvGetLocation.setText("Waiting for location.. (last " + LocationInfo.formatTimeAndDay(locationInfo.lastLocationUpdateTimestamp, true) + ")");
             }
         } else {
@@ -212,7 +208,8 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
                 }
                 i.putExtra("file", imgFile.getAbsoluteFile().toString());
                 Toast.makeText(NewTimelineItemPhotoActivity.this, "Photo will be processed in the background. You will be notified of any changes", Toast.LENGTH_LONG).show();
-                startService(i);
+                // startService(i);
+                WakefulIntentService.sendWakefulWork(NewTimelineItemPhotoActivity.this, i);
                 finish();
                 /*mTask = null;
                 mTask = new uploadImage();
@@ -257,101 +254,6 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
             }
 
             return null;
-        }
-    }
-
-    private class uploadImage extends AsyncTask<Void, Void, Void> {
-        MaterialDialog dialog;
-        WebAPIOutput res;
-        String bitmapString;
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            NewTimelineItemPhotoActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        if (dialog != null && dialog.isShowing()) {
-                            dialog.dismiss();
-                        }
-                        if (res != null) {
-                            if (res.getStatusCode() == 1) {
-                                SQLFunctions sql = new SQLFunctions(NewTimelineItemPhotoActivity.this);
-                                sql.open();
-                                Timeline t = new Timeline();
-                                t.setUnixTime((System.currentTimeMillis() / 1000L) + "");
-                                t.setMessage(etDescription.getText().toString().trim());
-                                t.setImage(imgFile.getName().toString());
-                                t.setVideo("");
-                                t.setLocation(locationName);
-                                if (currentLocation == null) {
-                                    t.setLocationLat("");
-                                    t.setLocationLong("");
-                                } else {
-                                    t.setLocationLat(Float.toString(currentLocation.lastLat));
-                                    t.setLocationLong(Float.toString(currentLocation.lastLong));
-                                }
-                                sql.insertTimelineItem(t);
-                                sql.close();
-                                finish();
-                            } else {
-                                Toast.makeText(NewTimelineItemPhotoActivity.this, res.getStatusDescription(), Toast.LENGTH_LONG).show();
-                            }
-                        } else {
-                            Log.e("Result", "There were no response from server");
-                            Toast.makeText(NewTimelineItemPhotoActivity.this, "There were no response from server", Toast.LENGTH_LONG).show();
-                        }
-                        startService(new Intent(NewTimelineItemPhotoActivity.this, MediaScannerService.class).putExtra("file", imgFile.getAbsoluteFile().toString()).putExtra("image", true));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        //Toast.makeText(NewTimelineItemPhotoActivity.this, e.getMessage().toString(), Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            try {
-                Utils u = new Utils(NewTimelineItemPhotoActivity.this);
-                bitmapString = u.convertBitmapToString(croppedImage);
-                SubmitMessage m;
-                if (locationName.equals(Consts.LOCATION_ERROR) || locationName.equals(Consts.LOCATION_LOADING)) {
-                    locationName = "";
-                } else {
-                    locationName = locationName.replace("null", "").trim();
-                }
-                if (currentLocation != null) {
-                    m = new SubmitMessage(u.getUnique(), etDescription.getText().toString().trim(), imgFile.getName() + ".jpg", bitmapString, Float.toString(currentLocation.lastLat), Float.toString(currentLocation.lastLong), locationName);
-                } else {
-                    m = new SubmitMessage(u.getUnique(), etDescription.getText().toString().trim(), imgFile.getName() + ".jpg", bitmapString, "", "", locationName);
-                }
-                try {
-                    res = MainApplication.apiService.uploadContentWithMessage(m);
-                    if (!isResendingPhoto && res != null) {
-                        Bitmap thumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(imgFile.getAbsolutePath().toString()), 180, 180);
-                        new Utils(NewTimelineItemPhotoActivity.this).saveImageToFolder(thumbnail, imgFile.getName().toString() + "_thumbnail");
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(NewTimelineItemPhotoActivity.this, e.getMessage().toString(), Toast.LENGTH_LONG).show();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = new MaterialDialog.Builder(NewTimelineItemPhotoActivity.this)
-                    .title("Uploading..")
-                    .cancelable(false)
-                    .customView(R.layout.loading, true)
-                    .build();
-            dialog.show();
         }
     }
 

@@ -22,9 +22,9 @@ public class AboutActivity extends ActionBarActivity {
         try {
             String versionName = getPackageManager()
                     .getPackageInfo(getPackageName(), 0).versionName;
-            tvVersion.setText("Photo Upload App\n" + versionName);
+            tvVersion.setText("Group Dissemination System\n" + versionName);
         } catch (Exception e) {
-            tvVersion.setText("Photo Upload App\nv1.00");
+            tvVersion.setText("Group Dissemination System\nv1.00");
         }
     }
 
