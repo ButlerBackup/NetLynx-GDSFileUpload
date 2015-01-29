@@ -30,6 +30,8 @@ public class UploadVideoService extends WakefulIntentService {
     File videoFile;
     String message, locationName, locationLat, locationLong;
     NotificationCompat.Builder mBuilder;
+    String dbItemId = "0";
+    boolean isResendFailed = false;
 
     public UploadVideoService() {
         super("UploadVideoService");
@@ -41,6 +43,7 @@ public class UploadVideoService extends WakefulIntentService {
         String videoString;
         Utils u;
         Bitmap thumbnail = null;
+        boolean isResending = false;
 
         int id = new Random().nextInt(1000);
         if (id < 1) {
@@ -61,34 +64,73 @@ public class UploadVideoService extends WakefulIntentService {
         if (!intent.hasExtra("locationLong")) {
             Log.e("Intent", "no locationLong");
         }
+        if (intent.hasExtra("resend") && intent.getBooleanExtra("resend", false)) {
+            isResending = intent.getBooleanExtra("resend", false);
+        }
+        if (intent.hasExtra("failedResend") && intent.getBooleanExtra("failedResend", false) && intent.hasExtra("id") && intent.getStringExtra("id") != null) {
+            isResendFailed = true;
+            dbItemId = intent.getStringExtra("id");
+        }
         if (intent.hasExtra("file") && intent.hasExtra("message") && intent.hasExtra("locationName") && intent.hasExtra("locationLat") && intent.hasExtra("locationLong")) {
             videoFile = new File(intent.getStringExtra("file"));
             message = intent.getStringExtra("message");
             locationName = intent.getStringExtra("locationName");
             locationLat = intent.getStringExtra("locationLat");
             locationLong = intent.getStringExtra("locationLong");
-            Toast.makeText(UploadVideoService.this, "Video will be processed in the background. You will be notified of any changes", Toast.LENGTH_LONG).show();
+            String compressVideoTime = videoFile.getName();
+            if (!isResending) {
+                compressVideoTime = System.currentTimeMillis() + "_compressed.mp4";
+            }
+            if (!isResendFailed) {
+                compressVideoTime = System.currentTimeMillis() + "_compressed.mp4";
+            }
+
+            SQLFunctions sql = new SQLFunctions(UploadVideoService.this);
+            sql.open();
+            if (!isResendFailed) {
+                Timeline t = new Timeline();
+                t.setUnixTime((System.currentTimeMillis() / 1000L) + "");
+                t.setMessage(message);
+                t.setImage("");
+                t.setVideo(compressVideoTime);
+                t.setLocation(locationName);
+                t.setLocationLat(locationLat);
+                t.setLocationLong(locationLong);
+                t.setSuccess("2"); // 2 = uploading
+                long tempid = sql.insertTimelineItem(t);
+
+                if (tempid > 0) {
+                    dbItemId = String.valueOf(tempid);
+                } else {
+                    Log.e("FAILED", "Unable to insert new data and get Id");
+                    stopSelf();
+                }
+            } else {
+                sql.setUploadStatus(dbItemId, "2");
+            }
+            sql.close();
             showNotification(id, "Uploading video", message, true, null);
 
             try {
                 u = new Utils(UploadVideoService.this);
                 updateNotification(id, "Compressing Video");
                 Log.e("UploadVideoService", "Compressing video");
-                String compressVideoTime = System.currentTimeMillis() + "_compressed.mp4";
-                LoadJNI vk = new LoadJNI();
-                try {
-                    String workFolder = getApplicationContext().getFilesDir().getAbsolutePath();
-                    String[] complexCommand = {"ffmpeg", "-y", "-i", videoFile.getAbsolutePath().toString(), "-strict", "experimental", "-s", "640x480", "-r", "25", "-vcodec", "mpeg4", "-b", "512k", "-ab", "48000", "-ac", "2", "-ar", "22050", "/sdcard/gdsupload/" + compressVideoTime};
-                    // -r = fps
-                    // vcodec = video codec
-                    //ar = audio sample frequency
-                    vk.run(complexCommand, workFolder, getApplicationContext());
-                    Log.i("test", "ffmpeg4android finished successfully");
-                } catch (Throwable e) {
-                    Log.e("test", "vk run exception.", e);
-                }
-                Log.e("UploadVideoService", "Done compressing video. Now uploading");
+                if (!isResending) {
+                    LoadJNI vk = new LoadJNI();
+                    try {
+                        String workFolder = getApplicationContext().getFilesDir().getAbsolutePath();
+                        String[] complexCommand = {"ffmpeg", "-y", "-i", videoFile.getAbsolutePath().toString(), "-strict", "experimental", "-s", "640x480", "-r", "25", "-vcodec", "mpeg4", "-b", "512k", "-ab", "48000", "-ac", "2", "-ar", "22050", "/sdcard/gdsupload/" + compressVideoTime};
+                        // -r = fps
+                        // vcodec = video codec
+                        //ar = audio sample frequency
+                        vk.run(complexCommand, workFolder, getApplicationContext());
+                        Log.i("test", "ffmpeg4android finished successfully");
+                    } catch (Throwable e) {
+                        Log.e("test", "vk run exception.", e);
+                    }
 
+                    Log.e("UploadVideoService", "Done compressing video. Now uploading");
+                }
                 //videoFile.delete();
                 updateNotification(id, "Uploading Video");
                 videoFile = new File("/sdcard/gdsupload/" + compressVideoTime);
@@ -110,23 +152,15 @@ public class UploadVideoService extends WakefulIntentService {
             } catch (Exception e) {
                 Log.e("ServiceDemo", "Service was interrupted.", e);
             }
+            sql = new SQLFunctions(UploadVideoService.this);
+            sql.open();
             try {
                 new Utils(UploadVideoService.this).cancelNotification(id);
                 if (res != null) {
                     if (res.getStatusCode() == 1) {
-                        SQLFunctions sql = new SQLFunctions(UploadVideoService.this);
-                        sql.open();
-                        Timeline t = new Timeline();
-                        t.setUnixTime((System.currentTimeMillis() / 1000L) + "");
-                        t.setMessage(message);
-                        t.setImage("");
-                        t.setVideo(videoFile.getName().toString());
-                        t.setLocation(locationName);
-                        t.setLocationLat(locationLat);
-                        t.setLocationLong(locationLong);
-                        sql.insertTimelineItem(t);
-                        sql.close();
+
                         showNotification(id, "Video uploaded!", message, false, thumbnail);
+                        sql.setUploadStatus(dbItemId, "1");
                         Intent i = new Intent(UploadVideoService.this, MediaScannerService.class);
                         i.putExtra("file", videoFile.getAbsoluteFile().toString());
                         i.putExtra("image", false);
@@ -134,20 +168,24 @@ public class UploadVideoService extends WakefulIntentService {
                         //stopSelf();
                         // show notification
                     } else {
+                        sql.setUploadStatus(dbItemId, "0");
                         showNotification(id, res.getStatusDescription(), res.getStatusDescription(), false, null);
                         Toast.makeText(UploadVideoService.this, res.getStatusDescription(), Toast.LENGTH_LONG).show();
                         //stopSelf();
                     }
                 } else {
+                    sql.setUploadStatus(dbItemId, "0");
                     Log.e("Result", "There were no response from server");
                     showNotification(id, "There were no response from server", "There were no response from server", false, null);
                     //stopSelf();
                 }
             } catch (Exception e) {
+                sql.setUploadStatus(dbItemId, "0");
                 e.printStackTrace();
                 showNotification(id, e.getMessage().toString(), e.getMessage().toString(), false, null);
                 //stopSelf();
             }
+            sql.close();
         } else {
             Log.e("SERVICE", "NO PARAMETER");
             showNotification(id, "No parameters", "No parameters", false, null);

@@ -184,7 +184,7 @@ public class NewTimelineItemVideoActivity extends ActionBarActivity {
                 Log.e("UPDATE", "Latest location has been broadcast");
                 new getLocationPlaceName().execute();
             } else {
-
+                tvGetLocation.setText(Consts.LOCATION_ERROR);
                 // tvGetLocation.setText("Waiting for location.. (last " + LocationInfo.formatTimeAndDay(locationInfo.lastLocationUpdateTimestamp, true) + ")");
             }
         } else {
@@ -224,6 +224,11 @@ public class NewTimelineItemVideoActivity extends ActionBarActivity {
                         i.putExtra("locationLong", "");
                     }
                     i.putExtra("file", videoFile.getAbsoluteFile().toString());
+                    i.putExtra("resend", isResendingVideo);
+                    if (timelineResent != null && timelineResent.getSuccess() != null && timelineResent.getSuccess().equals("0")) {//ofailed,1success,2uploading
+                        i.putExtra("failedResend", true);
+                        i.putExtra("id", timelineResent.getId());
+                    }
                     Toast.makeText(NewTimelineItemVideoActivity.this, "Video will be processed in the background. You will be notified of any changes", Toast.LENGTH_LONG).show();
                     //startService(i);
                     WakefulIntentService.sendWakefulWork(NewTimelineItemVideoActivity.this, i);
@@ -263,6 +268,8 @@ public class NewTimelineItemVideoActivity extends ActionBarActivity {
                         String countryName = addresses.get(0).getCountryName();
                         locationName = cityName + " " + stateName + " " + countryName;
                         Log.e("Location", locationName);
+                    } else {
+                        locationName = currentLocation.lastLat + ", " + currentLocation.lastLong;
                     }
                 } else {
                     locationName = Consts.LOCATION_ERROR;

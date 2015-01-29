@@ -10,7 +10,6 @@ import android.media.ThumbnailUtils;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 import com.netlynxtech.gdsfileupload.Consts;
@@ -29,6 +28,8 @@ public class UploadPhotoService extends WakefulIntentService {
     File photoFile;
     String message, locationName, locationLat, locationLong;
     NotificationCompat.Builder mBuilder;
+    String dbItemId = "0";
+    boolean isResendFailed = false;
 
     public UploadPhotoService() {
         super("UploadPhotoService");
@@ -58,13 +59,40 @@ public class UploadPhotoService extends WakefulIntentService {
         if (!intent.hasExtra("locationLong")) {
             Log.e("Intent", "no locationLong");
         }
-
+        if (intent.hasExtra("failedResend") && intent.getBooleanExtra("failedResend", false) && intent.hasExtra("id") && intent.getStringExtra("id") != null) {
+            isResendFailed = true;
+            dbItemId = intent.getStringExtra("id");
+        }
         if (intent.hasExtra("file") && intent.hasExtra("message") && intent.hasExtra("locationName") && intent.hasExtra("locationLat") && intent.hasExtra("locationLong")) {
             photoFile = new File(intent.getStringExtra("file"));
             message = intent.getStringExtra("message");
             locationName = intent.getStringExtra("locationName");
             locationLat = intent.getStringExtra("locationLat");
             locationLong = intent.getStringExtra("locationLong");
+            SQLFunctions sql = new SQLFunctions(UploadPhotoService.this);
+            sql.open();
+            if (!isResendFailed) { //if this is a new photo
+                Timeline t = new Timeline();
+                t.setUnixTime((System.currentTimeMillis() / 1000L) + "");
+                t.setMessage(message);
+                t.setImage(photoFile.getName().toString());
+                t.setVideo("");
+                t.setLocation(locationName);
+                t.setLocationLat(locationLat);
+                t.setLocationLong(locationLong);
+                t.setSuccess("2"); // 2 = uploading
+                long tempid = sql.insertTimelineItem(t);
+
+                if (tempid > 0) {
+                    dbItemId = String.valueOf(tempid);
+                } else {
+                    Log.e("FAILED", "Unable to insert new data and get Id");
+                    stopSelf();
+                }
+            } else { //if resending failed photo
+                sql.setUploadStatus(dbItemId, "2");
+            }
+            sql.close();
             showNotification(id, "Uploading photo", message, true, null);
             try {
                 u = new Utils(UploadPhotoService.this);
@@ -91,23 +119,14 @@ public class UploadPhotoService extends WakefulIntentService {
                 Log.e("ServiceDemo", "Service was interrupted.", e);
                 e.printStackTrace();
             }
+            sql = new SQLFunctions(UploadPhotoService.this);
+            sql.open();
             try {
                 new Utils(UploadPhotoService.this).cancelNotification(id);
                 if (res != null) {
                     if (res.getStatusCode() == 1) {
-                        SQLFunctions sql = new SQLFunctions(UploadPhotoService.this);
-                        sql.open();
-                        Timeline t = new Timeline();
-                        t.setUnixTime((System.currentTimeMillis() / 1000L) + "");
-                        t.setMessage(message);
-                        t.setImage(photoFile.getName().toString());
-                        t.setVideo("");
-                        t.setLocation(locationName);
-                        t.setLocationLat(locationLat);
-                        t.setLocationLong(locationLong);
-                        sql.insertTimelineItem(t);
-                        sql.close();
                         showNotification(id, "Photo uploaded!", message, false, thumbnail);
+                        sql.setUploadStatus(dbItemId, "1");
                         Intent i = new Intent(UploadPhotoService.this, MediaScannerService.class);
                         i.putExtra("file", photoFile.getAbsoluteFile().toString());
                         i.putExtra("image", true);
@@ -115,19 +134,24 @@ public class UploadPhotoService extends WakefulIntentService {
                         stopSelf();
                         // show notification
                     } else {
+
+                        sql.setUploadStatus(dbItemId, "0");
                         showNotification(id, res.getStatusDescription(), res.getStatusDescription(), false, null);
                         stopSelf();
                     }
                 } else {
+                    sql.setUploadStatus(dbItemId, "0");
                     Log.e("Result", "There were no response from server");
                     showNotification(id, "There were no response from server", "There were no response from server", false, null);
                     stopSelf();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                sql.setUploadStatus(dbItemId, "0");
                 showNotification(id, e.getMessage().toString(), e.getMessage().toString(), false, null);
                 stopSelf();
             }
+            sql.close();
         } else {
             Log.e("SERVICE", "NO PARAMETER");
             stopSelf();

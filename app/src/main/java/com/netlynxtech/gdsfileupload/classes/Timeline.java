@@ -6,7 +6,15 @@ import java.io.Serializable;
  * Created by Probook2 on 30/12/2014.
  */
 public class Timeline implements Serializable {
-    String id, unixTime, message, image, video, location, locationLat, locationLong;
+    String id, unixTime, message, image, video, location, locationLat, locationLong, success;
+
+    public String getSuccess() {
+        return success;
+    }
+
+    public void setSuccess(String success) {
+        this.success = success;
+    }
 
     public String getId() {
         return id;

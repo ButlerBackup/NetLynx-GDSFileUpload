@@ -11,6 +11,7 @@ import retrofit.RestAdapter;
 public class MainApplication extends Application {
 
     public static ApiService apiService;
+    public static int lvIndex = 0, lvTop = 0;
 
     @Override
     public void onCreate() {

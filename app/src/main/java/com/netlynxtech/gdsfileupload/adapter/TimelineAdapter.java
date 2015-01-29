@@ -115,6 +115,8 @@ public class TimelineAdapter extends MultiChoiceBaseAdapter {
         ImageView ivTimelineImage;
         @InjectView(R.id.ivIsVideo)
         ImageView ivIsVideo;
+        @InjectView(R.id.tvStatus)
+        TextView tvStatus;
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);
@@ -155,16 +157,25 @@ public class TimelineAdapter extends MultiChoiceBaseAdapter {
         } else {
             Log.e("DOESNT EXIST", "DOESNT EXIST");
         }
-        holder.ivTimelineImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!t.getImage().equals("")) {
-                    context.startActivity(new Intent(context, FullScreenImageActivity.class).putExtra("image", t.getImage()));
-                } else {
-                    context.startActivity(new Intent(context, FullScreenImageActivity.class).putExtra("video", t.getVideo()));
+        if (t.getSuccess().equals("0")) {
+            holder.tvStatus.setVisibility(View.VISIBLE);
+        } else if (t.getSuccess().equals("2")) {
+            holder.tvStatus.setText("Uploading..");
+        } else {
+            holder.tvStatus.setVisibility(View.GONE);
+        }
+        if ((!t.getImage().equals("") && t.getVideo().equals("")) || (t.getImage().equals("") && !t.getVideo().equals("") && t.getSuccess().equals("1"))) {
+            holder.ivTimelineImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (!t.getImage().equals("")) {
+                        context.startActivity(new Intent(context, FullScreenImageActivity.class).putExtra("image", t.getImage()));
+                    } else {
+                        context.startActivity(new Intent(context, FullScreenImageActivity.class).putExtra("video", t.getVideo()));
+                    }
                 }
-            }
-        });
+            });
+        }
         return view;
     }
 }

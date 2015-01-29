@@ -36,6 +36,10 @@ public class Consts {
     public static final String LOCATION_LOADING = "Loading location...";
 
 
+    //0 failed
+    //1 pass
+    // 2 uploading
+
     public static final int SERVICE_VIDEO_UPLOAD = 1337;
     public static final int SERVICE_PHOTO_UPLOAD = 1338;
 }

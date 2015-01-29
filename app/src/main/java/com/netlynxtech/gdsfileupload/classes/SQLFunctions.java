@@ -23,8 +23,9 @@ public class SQLFunctions {
     private static final String TABLE_TIMELINE_IMAGE = "timelineImage";
     private static final String TABLE_TIMELINE_VIDEO = "timelineVideo";
     private static final String TABLE_TIMELINE_MESSAGE = "timelineMessage";
+    private static final String TABLE_TIMELINE_SUCCESS = "timelineSuccess";
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     private DbHelper ourHelper;
     private final Context ourContext;
@@ -40,13 +41,16 @@ public class SQLFunctions {
         public void onCreate(SQLiteDatabase db) {
             db.execSQL("CREATE TABLE " + TABLE_TIMELINE + " (" + GLOBAL_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + TABLE_TIMELINE_UNIX + " TEXT NOT NULL, "
                     + TABLE_TIMELINE_MESSAGE + " TEXT NOT NULL, " + TABLE_TIMELINE_IMAGE + " TEXT NOT NULL, " + TABLE_TIMELINE_VIDEO + " TEXT NOT NULL, "
-                    + TABLE_TIMELINE_LOCATION + " TEXT NOT NULL, " + TABLE_TIMELINE_LOCATION_LAT + " TEXT NOT NULL, " + TABLE_TIMELINE_LOCATION_LONG + " TEXT NOT NULL);");
+                    + TABLE_TIMELINE_LOCATION + " TEXT NOT NULL, " + TABLE_TIMELINE_LOCATION_LAT + " TEXT NOT NULL, " + TABLE_TIMELINE_LOCATION_LONG + " TEXT NOT NULL, " + TABLE_TIMELINE_SUCCESS + " TEXT NOT NULL);");
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_TIMELINE);
-            onCreate(db);
+            switch (oldVersion) {
+                case 1:
+                    db.execSQL("ALTER TABLE " + TABLE_TIMELINE + " ADD COLUMN " + TABLE_TIMELINE_SUCCESS + " TEXT");
+                    break;
+            }
         }
     }
 
@@ -107,16 +111,16 @@ public class SQLFunctions {
         return "";
     }
 
-    /*public boolean setMessageAckDone(String messageId) {
-        String strFilter = Consts.MESSAGES_MESSAGE_ID + "='" + messageId + "'";
+    public boolean setUploadStatus(String id, String status) {
+        String strFilter = GLOBAL_ROWID + "='" + id + "'";
         ContentValues args = new ContentValues();
-        args.put(Consts.MESSAGES_MESSAGE_ACKDONE, "1");
-        if (ourDatabase.update(TABLE_MESSAGES, args, strFilter, null) > 0) {
+        args.put(TABLE_TIMELINE_SUCCESS, status);
+        if (ourDatabase.update(TABLE_TIMELINE, args, strFilter, null) > 0) {
             return true;
         } else {
             return false;
         }
-    }*/
+    }
 
     public void deleteAllTimelineItem() {
         ourDatabase.delete(TABLE_TIMELINE, null, null);
@@ -151,6 +155,7 @@ public class SQLFunctions {
                         t.setLocation(cursor.getString(cursor.getColumnIndex(TABLE_TIMELINE_LOCATION)));
                         t.setLocationLat(cursor.getString(cursor.getColumnIndex(TABLE_TIMELINE_LOCATION_LAT)));
                         t.setLocationLong(cursor.getString(cursor.getColumnIndex(TABLE_TIMELINE_LOCATION_LONG)));
+                        t.setSuccess(cursor.getString(cursor.getColumnIndex(TABLE_TIMELINE_SUCCESS)));
                         map.add(t);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -178,7 +183,7 @@ public class SQLFunctions {
         return count;
     }
 
-    public void insertTimelineItem(Timeline t) {
+    public long insertTimelineItem(Timeline t) {
         ContentValues cv = new ContentValues();
         String sql = "SELECT * FROM " + TABLE_TIMELINE;
         Cursor cursor = ourDatabase.rawQuery(sql, null);
@@ -191,11 +196,13 @@ public class SQLFunctions {
         cv.put(TABLE_TIMELINE_LOCATION, t.getLocation());
         cv.put(TABLE_TIMELINE_LOCATION_LAT, t.getLocationLat());
         cv.put(TABLE_TIMELINE_LOCATION_LONG, t.getLocationLong());
+        cv.put(TABLE_TIMELINE_SUCCESS, t.getSuccess());
         try {
-            ourDatabase.insert(TABLE_TIMELINE, null, cv);
+            return ourDatabase.insert(TABLE_TIMELINE, null, cv);
         } catch (Exception e) {
             Log.e(TAG, "Error creating timeline item entry", e);
         }
         cursor.close();
+        return 0;
     }
 }

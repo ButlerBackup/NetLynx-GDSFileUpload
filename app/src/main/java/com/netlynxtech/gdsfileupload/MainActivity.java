@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -117,6 +118,22 @@ public class MainActivity extends ActionBarActivity {
                     adapter = new TimelineAdapter(saveInstanceState, MainActivity.this, data);
                     lvTimeline.setAdapter(adapter);
                     adapter.setAdapterView(lvTimeline);
+                    if (MainApplication.lvTop != 0 && MainApplication.lvIndex != 0) {
+                        lvTimeline.setSelectionFromTop(MainApplication.lvIndex, MainApplication.lvTop);
+                    }
+                    lvTimeline.setOnScrollListener(new AbsListView.OnScrollListener() {
+                        @Override
+                        public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+                        }
+
+                        @Override
+                        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                            MainApplication.lvIndex = lvTimeline.getFirstVisiblePosition();
+                            View v = lvTimeline.getChildAt(0);
+                            MainApplication.lvTop = (v == null) ? 0 : (v.getTop() - lvTimeline.getPaddingTop());
+                        }
+                    });
                     adapter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
@@ -340,5 +357,13 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MainApplication.lvIndex = lvTimeline.getFirstVisiblePosition();
+        View v = lvTimeline.getChildAt(0);
+        MainApplication.lvTop = (v == null) ? 0 : (v.getTop() - lvTimeline.getPaddingTop());
     }
 }

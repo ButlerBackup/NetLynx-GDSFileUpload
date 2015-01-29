@@ -78,7 +78,7 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
             pictureFileName = getIntent().getStringExtra(Consts.IMAGE_GALLERY_PASS_EXTRAS);
             Uri uriPath = Uri.parse(pictureFileName);
             File tempFile = new File(uriPath.getPath());
-           // Toast.makeText(NewTimelineItemPhotoActivity.this, tempFile.getAbsolutePath().toString(), Toast.LENGTH_LONG).show();
+            // Toast.makeText(NewTimelineItemPhotoActivity.this, tempFile.getAbsolutePath().toString(), Toast.LENGTH_LONG).show();
             Log.e("FILENAME", uriPath.getPath());
             File destination = new File(new Utils(NewTimelineItemPhotoActivity.this).createFolder(), currentTime + ".jpg");
             try {
@@ -129,7 +129,7 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
         if (imgFile.exists()) {
             Log.e("File Size", imgFile.length() + "");
             Log.e("File Directory", imgFile.getAbsolutePath().toString());
-           // Toast.makeText(NewTimelineItemPhotoActivity.this, imgFile.getAbsolutePath().toString() + "\n" + imgFile.getName().toString(), Toast.LENGTH_LONG).show();
+            // Toast.makeText(NewTimelineItemPhotoActivity.this, imgFile.getAbsolutePath().toString() + "\n" + imgFile.getName().toString(), Toast.LENGTH_LONG).show();
             croppedImage = Utils.decodeSampledBitmapFromResource(imgFile);
             ivNewTimelineImage.setImageBitmap(croppedImage);
         } else {
@@ -172,6 +172,7 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
                 Log.e("UPDATE", "Latest location has been broadcast");
                 new getLocationPlaceName().execute();
             } else {
+                tvGetLocation.setText(Consts.LOCATION_ERROR);
                 // tvGetLocation.setText("Waiting for location.. (last " + LocationInfo.formatTimeAndDay(locationInfo.lastLocationUpdateTimestamp, true) + ")");
             }
         } else {
@@ -207,6 +208,10 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
                     i.putExtra("locationLong", "");
                 }
                 i.putExtra("file", imgFile.getAbsoluteFile().toString());
+                if (timelineResent != null && timelineResent.getSuccess() != null && timelineResent.getSuccess().equals("0")) {//ofailed,1success,2uploading
+                    i.putExtra("failedResend", true);
+                    i.putExtra("id", timelineResent.getId());
+                }
                 Toast.makeText(NewTimelineItemPhotoActivity.this, "Photo will be processed in the background. You will be notified of any changes", Toast.LENGTH_LONG).show();
                 // startService(i);
                 WakefulIntentService.sendWakefulWork(NewTimelineItemPhotoActivity.this, i);
@@ -245,6 +250,8 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
                         String countryName = addresses.get(0).getCountryName();
                         locationName = cityName + " " + stateName + " " + countryName;
                         Log.e("Location", locationName);
+                    } else {
+                        locationName = currentLocation.lastLat + ", " + currentLocation.lastLong;
                     }
                 } else {
                     locationName = Consts.LOCATION_ERROR;
@@ -252,7 +259,6 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
             return null;
         }
     }
