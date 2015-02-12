@@ -7,10 +7,13 @@
         android:configChanges="orientation|screenSize"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
+        android:screenOrientation="portrait"
         android:theme="@style/Theme.MyTheme">
         <activity
             android:name=".RegisterActivity"
-            android:label="@string/app_name">
+            android:configChanges="orientation|screenSize"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -19,16 +22,31 @@
         </activity>
         <activity
             android:name=".NewTimelineItemVideoActivity"
+            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".NewTimelineItemPhotoActivity"
+            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".MainActivity" />
-        <activity android:name=".VerifyPinActivity" />
-        <activity android:name=".RegistrationDoneActivity" />
-        <activity android:name=".FullScreenImageActivity" />
-        <activity android:name=".SettingsActivity" />
-        <activity android:name=".AboutActivity" />
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize" />
+        <activity
+            android:name=".VerifyPinActivity"
+            android:configChanges="orientation|screenSize" />
+        <activity
+            android:name=".RegistrationDoneActivity"
+            android:configChanges="orientation|screenSize" />
+        <activity
+            android:name=".FullScreenImageActivity"
+            android:configChanges="orientation|screenSize" />
+        <activity
+            android:name=".SettingsActivity"
+            android:configChanges="orientation|screenSize" />
+        <activity
+            android:name=".AboutActivity"
+            android:configChanges="orientation|screenSize" />
 
         <service android:name="com.littlefluffytoys.littlefluffylocationlibrary.LocationBroadcastService" />
 

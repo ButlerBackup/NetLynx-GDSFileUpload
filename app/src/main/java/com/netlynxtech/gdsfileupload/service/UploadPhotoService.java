@@ -131,27 +131,34 @@ public class UploadPhotoService extends WakefulIntentService {
                         i.putExtra("file", photoFile.getAbsoluteFile().toString());
                         i.putExtra("image", true);
                         WakefulIntentService.sendWakefulWork(UploadPhotoService.this, i);
+                        sql.close();
                         stopSelf();
                         // show notification
                     } else {
-
                         sql.setUploadStatus(dbItemId, "0");
                         showNotification(id, res.getStatusDescription(), res.getStatusDescription(), false, null);
+                        sql.close();
                         stopSelf();
                     }
                 } else {
                     sql.setUploadStatus(dbItemId, "0");
                     Log.e("Result", "There were no response from server");
                     showNotification(id, "There were no response from server", "There were no response from server", false, null);
+                    sql.close();
                     stopSelf();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 sql.setUploadStatus(dbItemId, "0");
                 showNotification(id, e.getMessage().toString(), e.getMessage().toString(), false, null);
+                sql.close();
                 stopSelf();
             }
-            sql.close();
+            try {
+                sql.close();
+            } catch (Exception e) {
+                
+            }
         } else {
             Log.e("SERVICE", "NO PARAMETER");
             stopSelf();

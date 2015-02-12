@@ -21,7 +21,8 @@ public class Consts {
     public static final String VIDEO_CAMERA_PASS_EXTRAS_PURE = "cameraFileNamePure";
 
     public static final String TIMELINE_ITEM_SELECTED_FROM_MAINACTIVITY = "timelineItem";
-    public static final String WEB_API_URL = "https://www.cloudmessage.me/svcFileUploadWebTier/svcFileUpload.svc";
+    //public static final String WEB_API_URL = "https://www.cloudmessage.me/svcFileUploadWebTier/svcFileUpload.svc";
+    public static final String WEB_API_URL = "http://gds.cloudapp.net/wcfFileUpload/svcFileUpload.svc";
 
     public static final String REGISTER_LOGIN_ID = "loginID";
     public static final String REGISTER_USER_NAME = "username";

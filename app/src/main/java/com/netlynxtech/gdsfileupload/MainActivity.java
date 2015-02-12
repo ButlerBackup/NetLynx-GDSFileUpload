@@ -109,6 +109,7 @@ public class MainActivity extends ActionBarActivity {
             MainActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    lvTimeline.setVisibility(View.GONE);
                     try {
                         mPullToRefreshLayout.setRefreshComplete();
                         Log.e("DONE", "ONREFRESHCOMPLETE");
@@ -118,9 +119,15 @@ public class MainActivity extends ActionBarActivity {
                     adapter = new TimelineAdapter(saveInstanceState, MainActivity.this, data);
                     lvTimeline.setAdapter(adapter);
                     adapter.setAdapterView(lvTimeline);
+                    try {
+                        adapter.notifyDataSetChanged();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     if (MainApplication.lvTop != 0 && MainApplication.lvIndex != 0) {
                         lvTimeline.setSelectionFromTop(MainApplication.lvIndex, MainApplication.lvTop);
                     }
+                    lvTimeline.setVisibility(View.VISIBLE);
                     lvTimeline.setOnScrollListener(new AbsListView.OnScrollListener() {
                         @Override
                         public void onScrollStateChanged(AbsListView view, int scrollState) {
