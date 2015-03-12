@@ -26,6 +26,8 @@ import com.netlynxtech.gdsfileupload.classes.WebAPIOutput;
 import java.io.File;
 import java.util.Random;
 
+import de.greenrobot.event.EventBus;
+
 public class UploadVideoService extends WakefulIntentService {
     File videoFile;
     String message, locationName, locationLat, locationLong;
@@ -165,31 +167,48 @@ public class UploadVideoService extends WakefulIntentService {
                         i.putExtra("file", videoFile.getAbsoluteFile().toString());
                         i.putExtra("image", false);
                         WakefulIntentService.sendWakefulWork(UploadVideoService.this, i);
-                        //stopSelf();
+                        EventBus.getDefault().post("UploadService");
+                        sql.close();
+                        stopSelf();
                         // show notification
                     } else {
                         sql.setUploadStatus(dbItemId, "0");
                         showNotification(id, res.getStatusDescription(), res.getStatusDescription(), false, null);
                         Toast.makeText(UploadVideoService.this, res.getStatusDescription(), Toast.LENGTH_LONG).show();
-                        //stopSelf();
+                        EventBus.getDefault().post("UploadService");
+                        sql.close();
+                        stopSelf();
                     }
                 } else {
                     sql.setUploadStatus(dbItemId, "0");
                     Log.e("Result", "There were no response from server");
                     showNotification(id, "There were no response from server", "There were no response from server", false, null);
-                    //stopSelf();
+                    EventBus.getDefault().post("UploadService");
+                    sql.close();
+                    stopSelf();
                 }
             } catch (Exception e) {
                 sql.setUploadStatus(dbItemId, "0");
                 e.printStackTrace();
                 showNotification(id, e.getMessage().toString(), e.getMessage().toString(), false, null);
-                //stopSelf();
+                EventBus.getDefault().post("UploadService");
+                sql.close();
+                stopSelf();
             }
-            sql.close();
+            try {
+                EventBus.getDefault().post("UploadService");
+                sql.close();
+                stopSelf();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         } else {
             Log.e("SERVICE", "NO PARAMETER");
             showNotification(id, "No parameters", "No parameters", false, null);
-            //stopSelf();
+            EventBus.getDefault().post("UploadService");
+            ;
+            stopSelf();
         }
     }
 

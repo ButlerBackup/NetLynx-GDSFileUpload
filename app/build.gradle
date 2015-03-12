@@ -60,4 +60,5 @@ dependencies {
     compile project(':library_ffmpeg4android')
     compile 'com.github.chrisbanes.actionbarpulltorefresh:extra-abc:+'
     compile files('src/main/libs/cwac-wakeful-1.0.5.jar')
+    compile 'de.greenrobot:eventbus:2.4.0'
 }

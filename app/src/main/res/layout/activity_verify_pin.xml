@@ -70,5 +70,5 @@
         app:cornerRadius="0dp"
         app:shadowColor="@color/fbutton_default_shadow_color"
         app:shadowEnabled="true"
-        app:shadowHeight="8dp" />
+        app:shadowHeight="4dp" />
 </RelativeLayout>

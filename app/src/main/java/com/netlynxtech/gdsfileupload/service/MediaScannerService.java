@@ -29,18 +29,19 @@ public class MediaScannerService extends WakefulIntentService {
                     type = "video/mp4";
                 }
                 File file = new File(intent.getStringExtra("file"));
-                MediaScannerConnection.scanFile(MediaScannerService.this, new String[]{file.getAbsolutePath().toString()}, new String[]{type}, new MediaScannerConnection.MediaScannerConnectionClient() {
-                    @Override
-                    public void onMediaScannerConnected() {
+                if (file.exists()) {
+                    MediaScannerConnection.scanFile(MediaScannerService.this, new String[]{file.getAbsolutePath().toString()}, new String[]{type}, new MediaScannerConnection.MediaScannerConnectionClient() {
+                        @Override
+                        public void onMediaScannerConnected() {
+                        }
 
-                    }
-
-                    @Override
-                    public void onScanCompleted(String s, Uri uri) {
-                        Log.e("MediaScannerService", s);
-                        stopSelf();
-                    }
-                });
+                        @Override
+                        public void onScanCompleted(String s, Uri uri) {
+                            Log.e("MediaScannerService", s);
+                            stopSelf();
+                        }
+                    });
+                }
 
             }
         } catch (Exception e) {

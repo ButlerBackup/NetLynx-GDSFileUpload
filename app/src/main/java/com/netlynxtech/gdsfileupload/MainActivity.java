@@ -36,6 +36,7 @@ import java.util.ArrayList;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.greenrobot.event.EventBus;
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
@@ -49,7 +50,7 @@ public class MainActivity extends ActionBarActivity {
     FloatingActionButton fab;
 
     String pictureDirectory = "";
-    ArrayList<Timeline> data = new ArrayList<Timeline>();
+    ArrayList<Timeline> data = new ArrayList<>();
     MultiChoiceBaseAdapter adapter;
     Bundle saveInstanceState;
     String filePath;
@@ -62,7 +63,14 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        EventBus.getDefault().register(MainActivity.this);
         new loadTimeline().execute();
+    }
+
+    public void onEvent(String event) {
+        if (event.equals("UploadService")) {
+            new loadTimeline().execute();
+        }
     }
 
     @Override
@@ -369,6 +377,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        EventBus.getDefault().unregister(MainActivity.this);
         MainApplication.lvIndex = lvTimeline.getFirstVisiblePosition();
         View v = lvTimeline.getChildAt(0);
         MainApplication.lvTop = (v == null) ? 0 : (v.getTop() - lvTimeline.getPaddingTop());
