@@ -84,7 +84,7 @@ public class NewTimelineItemPhotoActivity extends ActionBarActivity {
             try {
                 FileUtils.copyFile(tempFile, destination);
                 imgFile = new File(new Utils(NewTimelineItemPhotoActivity.this).createFolder(), currentTime + ".jpg");
-                tempFile.delete();
+                //tempFile.delete();
                 loadImageFile();
             } catch (IOException e) {
                 e.printStackTrace();

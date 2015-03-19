@@ -22,7 +22,8 @@ public class Consts {
 
     public static final String TIMELINE_ITEM_SELECTED_FROM_MAINACTIVITY = "timelineItem";
     //public static final String WEB_API_URL = "https://www.cloudmessage.me/svcFileUploadWebTier/svcFileUpload.svc";
-    public static final String WEB_API_URL = "http://gds.cloudapp.net/wcfFileUpload/svcFileUpload.svc";
+    // public static final String WEB_API_URL = "http://gds.cloudapp.net/wcfFileUpload/svcFileUpload.svc";
+    public static final String WEB_API_URL = "http://devegdscld.cloudapp.net/wcfFileUpload/svcfileupload.svc";
 
     public static final String REGISTER_LOGIN_ID = "loginID";
     public static final String REGISTER_USER_NAME = "username";
